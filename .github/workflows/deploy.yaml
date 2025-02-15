@@ -1,8 +1,9 @@
 name: DailyBuild
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    # Triggers at 00:30 UTC everyday
+    - cron:  '30 0 * * *'
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
