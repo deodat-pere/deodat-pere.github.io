@@ -1,0 +1,13 @@
+name: Deploy site
+on: [push]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scrape infos from the internet
+        run: (cd scraper; cargo run)
+      - name: NPM install
+        run: (cd frontend; npm install)
+      - name: Build and deploy
+        run: (cd frontend; npm run deploy)
