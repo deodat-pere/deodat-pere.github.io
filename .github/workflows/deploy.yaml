@@ -2,7 +2,7 @@ name: DailyBuild
 on:
   schedule:
     # Triggers at 00:30 UTC everyday
-    - cron:  '31 12 * * *'
+    - cron:  '40 12 * * *'
 
 jobs:
   deploy:
