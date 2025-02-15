@@ -34,4 +34,4 @@ jobs:
           echo "deod.at" > CNAME
           git add .
           git commit -m "Daily deployment"
-          git push
+          git push --set-upstream origin gh-pages
