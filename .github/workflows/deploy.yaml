@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Scrape infos from the internet
+      - name: Scrape
         run: |
           cd scraper
           cargo run
@@ -16,9 +16,21 @@ jobs:
         run: |
           cd frontend
           npm install
-      - name: Build and deploy
+      - name: Build
         run: |
+          cd frontend
+          npm run build
+      - name: Deploy
+        run : |
           git config --global user.name "GithubAction"
           git config --global user.email "username@users.noreply.github.com"
-          cd frontend
-          npm run deploy
+          git checkout -b gh-pages
+          cp -r frontend/dist/*
+          rm -rf frontend
+          rm -rf scraper
+          rm -rf .github
+          cp index.html 404.html
+          echo "deod.at" > CNAME
+          git add .
+          git commit -m "Daily deployment"
+          git push -u origin gh-pages
