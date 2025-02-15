@@ -1,13 +1,24 @@
 name: Deploy site
-on: [push]
+on:
+  push:
+    branches:
+      - main
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Scrape infos from the internet
-        run: (cd scraper; cargo run)
+        run: |
+          cd scraper
+          cargo run
       - name: NPM install
-        run: (cd frontend; npm install)
+        run: |
+          cd frontend
+          npm install
       - name: Build and deploy
-        run: (cd frontend; npm run deploy)
+        run: |
+          git config --global user.name "GithubAction"
+          git config --global user.email "username@users.noreply.github.com"
+          cd frontend
+          npm run deploy
