@@ -3,6 +3,9 @@ on:
   schedule:
     # Triggers at 00:30 UTC everyday
     - cron:  '30 0 * * *'
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -32,7 +35,7 @@ jobs:
           rm -rf scraper
           rm -rf .github
           cp index.html 404.html
-          echo "deod.at" > CNAME
+          echo "cine-rennes.deod.at" > CNAME
           git add .
           git commit -m "Daily deployment"
           git push --set-upstream origin gh-pages
