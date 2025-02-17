@@ -1,11 +1,9 @@
-use clap::Parser;
-
 use scraper::thread::refresh;
 use tracing::metadata::LevelFilter;
 
 use std::str::FromStr;
 
-use crate::config::{load_config, Args};
+use crate::config::load_config;
 use crate::error::ServerError;
 
 mod config;
@@ -14,8 +12,8 @@ mod scraper;
 
 #[allow(clippy::needless_return)]
 fn main() -> Result<(), ServerError> {
-    let args = Args::parse();
-    let config = load_config(&args.path).expect("Failed to load config");
+    let config_path = std::env::args().nth(1).unwrap_or("config.json".to_string());
+    let config = load_config(&config_path).expect("Failed to load config from {&config_path}");
 
     let my_filter =
         LevelFilter::from_str(&config.log.level).map_err(|_| ServerError::LogConfigParse)?;
@@ -28,7 +26,7 @@ fn main() -> Result<(), ServerError> {
         .with_writer(non_blocking)
         .init();
 
-    tracing::info!("init config from: {:?}", &args.path);
+    tracing::info!("init config from: {:?}", &config_path);
 
     refresh(&config)
 }

@@ -1,17 +1,18 @@
-use std::collections::{HashMap, HashSet};
-
-use reqwest::{blocking::Client, Error};
 use serde_json::{Number, Value};
+use std::collections::{HashMap, HashSet};
 use tracing::warn;
 
 use crate::config::Cinema;
 use crate::error::ServerError;
 
-pub(crate) fn do_request(url: String, client: &Client) -> Result<String, Error> {
-    let response = client.post(url.clone()).send().inspect_err(|_| {
-        warn!("Couldn't download url {url}");
-    })?;
-    response.text()
+pub(crate) fn do_request(url: String) -> Result<String, ureq::Error> {
+    ureq::post(&url)
+        .send_empty()
+        .inspect_err(|_| {
+            warn!("Couldn't download url {url}");
+        })?
+        .body_mut()
+        .read_to_string()
 }
 
 pub(crate) fn extract_info<'a>(

@@ -27,12 +27,11 @@ pub(crate) fn parse_one_day<'a>(
     dict: &'a mut HashMap<String, InfoGlob>,
 ) -> Result<&'a mut HashMap<String, InfoGlob>, ()> {
     // Create a reqwest client
-    let client = reqwest::blocking::Client::new();
     let url = format!(
         "https://www.allocine.fr/_/showtimes/theater-{}/d-{day_tag}/",
         cine.id
     );
-    let body = do_request(url.clone(), &client).map_err(|e| {
+    let body = do_request(url.clone()).map_err(|e| {
         warn!("Error on {url}: {e}");
     })?;
     info!("cine {}, jour {day_tag}", cine.id);
