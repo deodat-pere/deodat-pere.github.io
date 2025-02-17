@@ -12,10 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Scrape
+      - name: Compile
         run: |
           cd scraper
-          cargo run
+          cargo build
+      - name: Scrape
+        run: |
+          scraper/target/debug/scraper
       - name: NPM install
         run: |
           cd frontend
