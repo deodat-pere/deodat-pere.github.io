@@ -18,7 +18,8 @@ jobs:
           cargo build
       - name: Scrape
         run: |
-          scraper/target/debug/scraper scraper/config.json
+          cd scraper
+          target/debug/scraper
       - name: NPM install
         run: |
           cd frontend
