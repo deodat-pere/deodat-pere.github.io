@@ -18,6 +18,7 @@ export default defineConfig({
       theme_color: "#556cd6",
       description: "Découvrez les films diffusés à Rennes cette semaine!",
       name: "Ciné Rennes",
+      short_name: "Ciné Rennes",
       screenshots: [
         {
           src: "/mobile_screenshot_home.png",
