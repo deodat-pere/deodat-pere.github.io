@@ -72,7 +72,11 @@ function TopBar() {
               sx={{ display: { xs: 'block', md: 'none' } }}
             >
               {pages.map((page) => (
-                <MenuItem key={page.title} onClick={(() => navigate(page.path))}>
+                <MenuItem key={page.title} onClick={(() => {
+                  handleCloseNavMenu();
+                  navigate(page.path)
+                }
+                )}>
                   <Typography sx={{ textAlign: 'center' }}>{page.title}</Typography>
                 </MenuItem>
               ))}

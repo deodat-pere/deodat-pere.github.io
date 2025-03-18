@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Chip from '@mui/material/Chip';
+import { useCallback, useEffect } from 'react';
 
 export type MovieDescriptionProps = {
     movie: MovieProps,
@@ -20,6 +21,20 @@ export default function MovieDescription(props: MovieDescriptionProps) {
         let path = `/movie/` + props.movie.id.toString();
         navigate(path);
     }
+
+    const escFunction = useCallback((event: any) => {
+        if (event.key === "Escape" && props.closePopup) {
+            props.closePopup(false)
+        }
+    }, []);
+
+    useEffect(() => {
+        document.addEventListener("keydown", escFunction, false);
+
+        return () => {
+            document.removeEventListener("keydown", escFunction, false);
+        };
+    }, [escFunction])
 
     return (
         <Card sx={{
