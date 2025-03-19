@@ -12,9 +12,9 @@ export default function MovieCard(props: MovieProps): JSX.Element {
     const summaryRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
 
-    let navigate = useNavigate();
+    const navigate = useNavigate();
     const routeChange = () => {
-        let path = '/movie/' + props.id.toString();
+        const path = '/movie/' + props.id.toString();
         navigate(path);
     }
 

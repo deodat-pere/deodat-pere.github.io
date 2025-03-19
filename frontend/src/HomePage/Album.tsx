@@ -25,6 +25,7 @@ export type AlbumProps = {
 }
 
 const filters = [
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (_: MovieProps) => (true),
     (movie: MovieProps) => (movie.is_new),
     (movie: MovieProps) => (movie.is_unique),

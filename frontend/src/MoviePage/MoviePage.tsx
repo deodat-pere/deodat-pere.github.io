@@ -9,7 +9,7 @@ import { movieById } from '../structTransform';
 export default function MoviePage() {
     const { id } = useParams();
 
-    var movie: MovieProps | null = null;
+    let movie: MovieProps | null = null;
     if (id) {
         if (Number(id)) {
             movie = movieById(Number(id))

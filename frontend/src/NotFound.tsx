@@ -8,9 +8,9 @@ import theme from './theme';
 import { useNavigate } from 'react-router-dom';
 
 export default function NotFound() {
-    let navigate = useNavigate();
+    const navigate = useNavigate();
     const routeChange = () => {
-        let path = `/`;
+        const path = `/`;
         navigate(path);
     }
     return (

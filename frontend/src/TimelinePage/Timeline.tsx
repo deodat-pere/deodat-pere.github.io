@@ -12,7 +12,8 @@ export type TimelineProps = {
     movies: MovieProps[],
 }
 
-export const filters = [
+const filters = [
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (_: IDedSeance) => (true),
     (seance: IDedSeance) => (!seance.seance.dubbed),
     (seance: IDedSeance) => (!seance.seance.subtitled),

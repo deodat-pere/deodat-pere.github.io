@@ -21,17 +21,17 @@ export type ShowingProps = {
 }
 
 export default function ShowingsList(props: ShowingsListProps) {
-    var showings: ShowingProps[] | null = null;
+    let showings: ShowingProps[] | null = null;
 
     if (Number(props.id)) {
         showings = seanceById(Number(props.id))
     }
 
     if (showings) {
-        let mappings: Map<string, PrettyShow[]> = new Map;
+        const mappings: Map<string, PrettyShow[]> = new Map;
 
         showings.forEach((showing) => {
-            var tag = "FR";
+            let tag = "FR";
             if (showing.dubbed) {
                 tag = "VF"
             } else if (showing.subtitled) {
@@ -39,9 +39,9 @@ export default function ShowingsList(props: ShowingsListProps) {
             }
             const d: string[] = parse_date(showing.time);
 
-            let show_arr = mappings.get(d[0]);
+            const show_arr = mappings.get(d[0]);
             if (show_arr) {
-                let pshow: PrettyShow = {
+                const pshow: PrettyShow = {
                     cine: showing.cine,
                     day: d[1],
                     hour: parse_hour(showing.time),
@@ -50,7 +50,7 @@ export default function ShowingsList(props: ShowingsListProps) {
                 show_arr.push(pshow);
                 mappings.set(d[0], show_arr);
             } else {
-                let pshow: PrettyShow = {
+                const pshow: PrettyShow = {
                     cine: showing.cine,
                     day: d[1],
                     hour: parse_hour(showing.time),
@@ -60,7 +60,7 @@ export default function ShowingsList(props: ShowingsListProps) {
             }
         });
 
-        let unique_day_arr: string[] = Array.from(mappings.keys());
+        const unique_day_arr: string[] = Array.from(mappings.keys());
         return (
             <div>
                 < Typography variant="h4" align="left" color="text.primary" margin={2}>

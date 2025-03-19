@@ -18,6 +18,7 @@ const ClickedSx = {
     transform: "scale(1.05)"
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function get_button_style(selected: number, id: number): any {
     if (selected == id) {
         return ClickedSx

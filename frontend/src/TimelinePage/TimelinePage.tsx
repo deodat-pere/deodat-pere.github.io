@@ -31,12 +31,12 @@ export default function TimelinePage() {
 
     const jsonData: IDedSeance[] = getSeances();
 
-    let mappings: Map<string, IDedSeance[]> = new Map;
+    const mappings: Map<string, IDedSeance[]> = new Map;
 
     jsonData.forEach((showing) => {
         const d: string[] = parse_date(showing.seance.time);
 
-        let show_arr = mappings.get(d[0]);
+        const show_arr = mappings.get(d[0]);
         if (show_arr) {
             show_arr.push(showing);
             mappings.set(d[0], show_arr);
@@ -47,10 +47,10 @@ export default function TimelinePage() {
 
     const days: string[] = Array.from(mappings.keys()).sort().map((d: string) => small_date(d));
     const longdays: string[] = Array.from(mappings.keys()).sort()
-    var dayed_seances: DayedSeances[] = [];
+    const dayed_seances: DayedSeances[] = [];
 
     longdays.forEach((day) => {
-        var show_arr = mappings.get(day);
+        const show_arr = mappings.get(day);
         if (show_arr) {
             const t: DayedSeances = {
                 day: day,
