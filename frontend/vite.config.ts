@@ -45,6 +45,7 @@ export default defineConfig({
     },
     pwaAssets: {
       image: "public/camera.svg"
-    }
+    },
+    registerType: 'autoUpdate'
   })],
 })
