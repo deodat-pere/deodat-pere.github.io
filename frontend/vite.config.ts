@@ -15,7 +15,7 @@ export default defineConfig({
   },
   plugins: [react(), VitePWA({
     manifest: {
-      theme_color: "#556cd6",
+      theme_color: "#757575",
       description: "Découvrez les films diffusés à Rennes cette semaine!",
       name: "Ciné Rennes",
       short_name: "Ciné Rennes",
@@ -45,6 +45,7 @@ export default defineConfig({
     },
     pwaAssets: {
       image: "public/camera.svg"
-    }
+    },
+    registerType: 'autoUpdate'
   })],
 })
