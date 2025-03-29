@@ -19,6 +19,16 @@ export default defineConfig({
       description: "Découvrez les films diffusés à Rennes cette semaine!",
       name: "Ciné Rennes",
       short_name: "Ciné Rennes",
+      shortcuts: [
+        {
+          name: "Jour par jour",
+          url: '/timeline',
+          icons: [{
+            src: '/calendar.png',
+            sizes: '256x256'
+          }]
+        }
+      ],
       screenshots: [
         {
           src: "/mobile_screenshot_home.png",
