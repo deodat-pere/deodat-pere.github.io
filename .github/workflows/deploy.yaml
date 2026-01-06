@@ -1,8 +1,8 @@
 name: DailyBuild
 on:
   schedule:
-    # Triggers at 00:30 UTC everyday
-    - cron:  '30 0 * * *'
+    # Triggers at 06:30 UTC everyday
+    - cron: "30 6 * * *"
   push:
     branches:
       - main
@@ -30,11 +30,12 @@ jobs:
           cd frontend
           npm run build
       - name: Deploy
-        run : |
+        run: |
           git config --global user.name "GithubAction"
           git config --global user.email "username@users.noreply.github.com"
           git checkout -b gh-pages
           git pull --rebase origin gh-pages
+          rm -rf ./assets
           cp -r frontend/dist/* .
           rm -rf frontend
           rm -rf scraper
