@@ -18,11 +18,11 @@ type MenuPage = {
 const pages: MenuPage[] = [
   {
     title: 'Tous les films',
-    path: "/"
+    path: "/all"
   },
   {
     title: 'Jour par jour',
-    path: "/timeline"
+    path: "/"
   }];
 
 function TopBar() {
@@ -134,8 +134,8 @@ export default function App() {
         <BrowserRouter>
           <TopBar />
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/timeline" element={<TimelinePage />} />
+            <Route path="/" element={<TimelinePage />} />
+            <Route path="/all" element={<HomePage />} />
             <Route path="/movie/:id" element={<MoviePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes >

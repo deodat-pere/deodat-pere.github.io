@@ -68,6 +68,8 @@ export default function TimelinePage() {
 
     const seances: DayedSeances[] = dayed_seances;
 
+    const presentationText = "Découvrez les films diffusés à Rennes cette semaine!";
+
     return (
         <main>
             {/* Hero unit */}
@@ -86,6 +88,9 @@ export default function TimelinePage() {
                         color="text.primary"
                     >
                         Films par jour
+                    </Typography>
+                    <Typography variant="h5" align="center" color="text.secondary">
+                        {presentationText}
                     </Typography>
                 </Container>
             </Box>

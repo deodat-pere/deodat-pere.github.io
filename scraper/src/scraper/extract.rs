@@ -157,8 +157,10 @@ pub(crate) fn build_showtimes(showtimes: &Value, cine: &Cinema) -> Vec<InfoSeanc
                 hash_set.insert(InfoSeance {
                     time: time.into(),
                     cine: cine.name.clone(),
-                    dubbed: tag == "dubbed",
-                    subtitled: tag == "original",
+                    dubbed: tag == "multiple" || tag == "multiple_st" || tag == "multiple_st_sme",
+                    subtitled: tag == "original"
+                        || tag == "original_st"
+                        || tag == "original_st_sme",
                 })
             })
             .collect::<Vec<_>>();

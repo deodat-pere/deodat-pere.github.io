@@ -16,10 +16,8 @@ export default function SeanceCard(props: SeanceCardProps): JSX.Element {
     function get_tag(seance: SeanceCardProps) {
         if (seance.seance.dubbed) {
             return "VF"
-        } else if (seance.seance.subtitled) {
-            return "VOST"
         } else {
-            return "FR"
+            return "VO"
         }
     }
 

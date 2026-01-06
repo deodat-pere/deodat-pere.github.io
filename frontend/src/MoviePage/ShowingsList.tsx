@@ -31,11 +31,11 @@ export default function ShowingsList(props: ShowingsListProps) {
         const mappings: Map<string, PrettyShow[]> = new Map;
 
         showings.forEach((showing) => {
-            let tag = "FR";
+            let tag = "VO";
             if (showing.dubbed) {
                 tag = "VF"
-            } else if (showing.subtitled) {
-                tag = "VOST"
+            } else {
+                tag = "VO"
             }
             const d: string[] = parse_date(showing.time);
 
@@ -81,7 +81,7 @@ export default function ShowingsList(props: ShowingsListProps) {
                                                 < Typography align="left" color="text.primary" paddingLeft={1} paddingRight={1}>
                                                     {props.hour}
                                                 </Typography>
-                                                {(props.tag == "FR") ? <></> : <Chip label={props.tag} size={"small"} variant={"outlined"} sx={{ marginRight: 1 }} />}
+                                                {(props.tag == "VF") ? <></> : <Chip label={props.tag} size={"small"} variant={"outlined"} sx={{ marginRight: 1 }} />}
                                             </Box>
                                             <Box display={"flex"} flexDirection={"column-reverse"} marginBottom={1}>
                                                 < Typography align="left" color="text.secondary" paddingLeft={1} paddingRight={1}>
