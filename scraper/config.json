@@ -1,0 +1,22 @@
+{
+    "database": {
+        "file": "movies.json"
+    },
+    "log": {
+        "level": "INFO"
+    },
+    "cinemas": [
+        {
+            "id": "P0084",
+            "name": "Cinéma Arvor"
+        },
+        {
+            "id": "P0091",
+            "name": "Pathé Rennes"
+        },
+        {
+            "id": "P0102",
+            "name": "Ciné TNB"
+        }
+    ]
+}
