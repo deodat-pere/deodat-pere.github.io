@@ -133,7 +133,14 @@ pub(crate) fn build_movie(movie: &Value) -> InfoMovie {
 pub(crate) fn build_showtimes(showtimes: &Value, cine: &Cinema) -> Vec<InfoSeance> {
     let mut hash_set = HashSet::new();
 
-    for tag in ["dubbed", "original", "local"] {
+    for tag in [
+        "original",
+        "original_st",
+        "original_st_sme",
+        "multiple",
+        "multiple_st",
+        "multiple_st_sme",
+    ] {
         let mut vec: Vec<&String> = Vec::new();
         match get_array(showtimes, tag) {
             Err(_) => println!("Not found {tag}"),
