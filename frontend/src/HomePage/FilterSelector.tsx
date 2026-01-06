@@ -1,6 +1,5 @@
 import Box from '@mui/material/Box';
-import { Button, FormControl, InputLabel, MenuItem, Paper, Select, SelectChangeEvent } from '@mui/material';
-import { useState } from 'react';
+import { Button, Paper } from '@mui/material';
 
 export type FilterSelectorProps = {
     id: number,
@@ -39,28 +38,13 @@ export default function FilterSelector(props: FilterSelectorProps): JSX.Element 
     const options = ["Tous les films", "Sorties de la semaine", "Diffusions uniques", "Avant premières"];
     const opt_len = options.length;
 
-    const [filterText, setFilterText] = useState(options[0])
-
-    const handleChange = (event: SelectChangeEvent) => {
-        setFilterText(event.target.value as string);
-    };
+    function handleClick(id: number) {
+        props.setId(id)
+    }
 
     return (
         <Box display={"flex"} flexDirection={"row"} flexWrap={"wrap"} width="lg" justifyContent={"center"}>
-            <FormControl fullWidth>
-                <InputLabel>Filtre</InputLabel>
-                <Select
-                    defaultValue={0}
-                    value={filterText}
-                    label="Filtre"
-                    onChange={handleChange}
-                >
-                    {Array.from(Array(opt_len).keys()).map((id: number) => (
-                        <MenuItem value={id}>{options[id]}</MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
-            {/* {Array.from(Array(opt_len).keys()).map((id: number) => (
+            {Array.from(Array(opt_len).keys()).map((id: number) => (
                 <Paper sx={get_button_style(props.id, id)} key={id}>
                     <Button sx={{
                         color: "text.primary"
@@ -70,7 +54,7 @@ export default function FilterSelector(props: FilterSelectorProps): JSX.Element 
                     </Button>
                 </Paper>
             ))
-            } */}
+            }
         </Box >
     )
 
