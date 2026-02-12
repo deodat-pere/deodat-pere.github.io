@@ -7,7 +7,7 @@ import Album from './Album';
 
 
 
-export default function HomePage() {
+export default function HomePage(props: {selectedProfile: string}) {
     const [filterId, setFilterId] = useState<number>(0);
 
     const presentationText = "Découvrez les films diffusés à Rennes cette semaine!";
@@ -37,7 +37,7 @@ export default function HomePage() {
                 </Container>
             </Box>
             <FilterSelector id={filterId} setId={setFilterId} />
-            <Album filterId={filterId} />
+            <Album filterId={filterId} selectedProfile={props.selectedProfile}/>
         </main>
     );
 }

@@ -19,25 +19,26 @@ export const not_found_movie_props: MovieProps = {
     is_premiere: false,
     is_unique: false,
     rating: 0,
-    genres: []
+    genres: [],
+    cinemas: []
 } 
 
 export function small_date(s: string) {
-    let jours = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
-    let b = s.split(/\D+/);
-    let date = new Date(Date.UTC(Number(b[0]), Number(b[1]) - 1, Number(b[2])));
+    const jours = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+    const b = s.split(/\D+/);
+    const date = new Date(Date.UTC(Number(b[0]), Number(b[1]) - 1, Number(b[2])));
 
-    let date_pretty = jours[date.getDay()] + " " + date.getDate();
+    const date_pretty = jours[date.getDay()] + " " + date.getDate();
     return date_pretty;
 }
 
 export function parse_date(s: string) {
-    let jours = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
-    let mois = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-    let b = s.split(/\D+/);
-    let date = new Date(Date.UTC(Number(b[0]), Number(b[1]) - 1, Number(b[2])));
+    const jours = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+    const mois = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+    const b = s.split(/\D+/);
+    const date = new Date(Date.UTC(Number(b[0]), Number(b[1]) - 1, Number(b[2])));
 
-    let date_pretty = jours[date.getDay()] + " " + date.getDate() + " " + mois[date.getMonth()];
+    const date_pretty = jours[date.getDay()] + " " + date.getDate() + " " + mois[date.getMonth()];
     return [date.toISOString(), date_pretty];
 }
 

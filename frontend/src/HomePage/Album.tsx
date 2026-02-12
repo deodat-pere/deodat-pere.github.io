@@ -2,6 +2,7 @@ import Grid from '@mui/material/Grid2';
 import Container from '@mui/material/Container';
 import MovieCard from './MovieCard';
 import { getMovies } from '../structTransform';
+import { getProfile } from '../localStorage'; // <-- new import
 
 
 
@@ -17,11 +18,13 @@ export type MovieProps = {
     is_premiere: boolean,
     is_unique: boolean,
     rating: number,
-    genres: Array<string>
+    genres: string[]
+    cinemas: string[]
 }
 
 export type AlbumProps = {
     filterId: number,
+    selectedProfile: string,
 }
 
 const filters = [
@@ -35,14 +38,27 @@ const filters = [
 export default function Album(props: AlbumProps) {
     const movies = getMovies();
 
+    // Get cinemas for the selected profile
+    const profileCinemas = props.selectedProfile
+        ? getProfile(props.selectedProfile)?.cinemas ?? []
+        : [];
+
+    // Filter movies by profile cinemas if list is non‑empty
+    const filteredMovies = profileCinemas.length > 0
+        ? movies.filter(movie => movie.cinemas.some(c => profileCinemas.includes(c)))
+        : movies;
+
     return (
         <Container sx={{ py: 8 }} maxWidth="md">
             <Grid container spacing={1.5} columns={{ xs: 4, sm: 8, md: 12 }}>
-                {movies.filter(filters[props.filterId]).sort((a, b) => (a.name.localeCompare(b.name))).map((movie: MovieProps) => (
-                    <Grid key={movie.id} size={4}>
-                        <MovieCard {...movie} />
-                    </Grid>
-                ))}
+                {filteredMovies
+                    .filter(filters[props.filterId])
+                    .sort((a, b) => (a.name.localeCompare(b.name)))
+                    .map((movie: MovieProps) => (
+                        <Grid key={movie.id} size={4}>
+                            <MovieCard {...movie} />
+                        </Grid>
+                    ))}
             </Grid>
         </Container>
     );

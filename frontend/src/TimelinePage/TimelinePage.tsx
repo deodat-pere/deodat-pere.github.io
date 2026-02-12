@@ -20,7 +20,8 @@ export type DayedSeances = {
     seances: IDedSeance[]
 }
 
-export default function TimelinePage() {
+export default function TimelinePage(props: {    selectedProfile: string
+}) {
     const [dayFilterId, setDayFilterId] = useState<number>(0);
     const [lgFilterId, setLgFilterId] = useState<number>(0);
     const languages = ["Toutes les séances", "Non doublées", "Sans sous-titres"];
@@ -86,6 +87,7 @@ export default function TimelinePage() {
                         variant="h2"
                         align="center"
                         color="text.primary"
+                        gutterBottom
                     >
                         Films par jour
                     </Typography>
@@ -99,7 +101,7 @@ export default function TimelinePage() {
                 <Chip label="Filtres" size="small" />
             </Divider>
             <FilterSelector id={lgFilterId} setId={setLgFilterId} options={languages} />
-            <Timeline dayFilterId={dayFilterId} lgFilterId={lgFilterId} seances={seances} movies={movies} />
+            <Timeline dayFilterId={dayFilterId} lgFilterId={lgFilterId} seances={seances} movies={movies} selectedProfile={props.selectedProfile}/>
         </main>
     );
 }

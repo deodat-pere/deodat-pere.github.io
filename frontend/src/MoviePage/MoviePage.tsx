@@ -6,29 +6,30 @@ import MovieDescription from './MovieDescription';
 import ShowingsList from './ShowingsList';
 import { movieById } from '../structTransform';
 
-export default function MoviePage() {
-    const { id } = useParams();
+export type MoviePageProps = {
+  selectedProfile: string; 
+};
 
-    let movie: MovieProps | null = null;
-    if (id) {
-        if (Number(id)) {
-            movie = movieById(Number(id))
-        }
-    }
+export default function MoviePage({ selectedProfile }: MoviePageProps) {
+  const { id } = useParams();
 
-    if (movie && id) {
-        return (
-            <Box display={'flex'} flexDirection={'column'} justifySelf={"center"} marginLeft={2} paddingTop={4}>
-                <MovieDescription movie={movie} />
-                <Box paddingTop={6}>
-                    <ShowingsList id={id} />
-                </Box>
-            </Box>
-        );
-    } else {
-        return (
-            <NotFound />
-        );
-    }
+  let movie: MovieProps | null = null;
+  if (id) {
+    movie = movieById(Number(id));
+  }
 
+  if (movie && id) {
+    return (
+      <Box display={'flex'} flexDirection={'column'} justifySelf={"center"} marginLeft={2} paddingTop={4}>
+        <MovieDescription movie={movie} />
+        <Box paddingTop={6}>
+          <ShowingsList id={id} selectedProfile={selectedProfile} /> 
+        </Box>
+      </Box>
+    );
+  } else {
+    return (
+      <NotFound />
+    );
+  }
 }

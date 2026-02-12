@@ -1,9 +1,11 @@
 import { Typography, Container, Divider, Box, Card, Chip } from "@mui/material";
 import { parse_date, parse_hour } from "../utils";
 import { seanceById } from "../structTransform";
+import { getProfile } from '../localStorage'; 
 
 export type ShowingsListProps = {
-    id: string
+    id: string,
+    selectedProfile: string, 
 };
 
 export type PrettyShow = {
@@ -27,10 +29,18 @@ export default function ShowingsList(props: ShowingsListProps) {
         showings = seanceById(Number(props.id))
     }
 
+    const profileCinemas = props.selectedProfile
+        ? getProfile(props.selectedProfile)?.cinemas ?? []
+        : [];
+
     if (showings) {
+        const filteredShowings = profileCinemas.length > 0
+            ? showings.filter(s => profileCinemas.includes(s.cine))
+            : showings;
+
         const mappings: Map<string, PrettyShow[]> = new Map;
 
-        showings.forEach((showing) => {
+        filteredShowings.forEach((showing) => {
             let tag = "VO";
             if (showing.dubbed) {
                 tag = "VF"
@@ -102,4 +112,4 @@ export default function ShowingsList(props: ShowingsListProps) {
     } else {
         return (<div></div>);
     }
-}  
+}

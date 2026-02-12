@@ -37,6 +37,7 @@ jobs:
           git pull --rebase origin gh-pages
           rm -rf ./assets
           cp -r frontend/dist/* .
+          cp scraper/movies.json assets/
           rm -rf frontend
           rm -rf scraper
           rm -rf .github
