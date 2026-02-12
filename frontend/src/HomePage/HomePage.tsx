@@ -10,7 +10,7 @@ import Album from './Album';
 export default function HomePage(props: {selectedProfile: string}) {
     const [filterId, setFilterId] = useState<number>(0);
 
-    const presentationText = "Découvrez les films diffusés à Rennes cette semaine!";
+    const presentationText = "Découvrez les films diffusés à Paris cette semaine!";
 
     return (
         <main>
