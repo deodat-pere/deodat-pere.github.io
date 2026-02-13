@@ -33,19 +33,14 @@ jobs:
         run: |
           git config --global user.name "GithubAction"
           git config --global user.email "username@users.noreply.github.com"
-          git add .
-          git stash
           git checkout -b gh-pages
-          git pull --rebase origin gh-pages
-          git stash pop
-          rm -rf ./assets
           cp -r frontend/dist/* .
           cp scraper/movies.json assets/
           rm -rf frontend
           rm -rf scraper
           rm -rf .github
           cp index.html 404.html
-          echo "cine-rennes.deod.at" > CNAME
+          echo "cine-paris.deod.at" > CNAME
           git add .
           git commit -m "Daily deployment"
-          git push --set-upstream origin gh-pages
+          git push  --force origin gh-pages
