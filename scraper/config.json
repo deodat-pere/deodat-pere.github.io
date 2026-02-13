@@ -48,11 +48,11 @@
         },
         {
             "id": "W7616",
-            "name": "Cinéma cité de l&#039;architecture et du patrimoine"
+            "name": "Cinéma cité de l'architecture et du patrimoine"
         },
         {
             "id": "P0007",
-            "name": "Cinéma du musée du quai Branly - Jacques Chirac"
+            "name": "Cinéma du musée du quai Branly"
         },
         {
             "id": "C0076",
@@ -60,7 +60,7 @@
         },
         {
             "id": "W7501",
-            "name": "Cinéma en plein air de la Villette"
+            "name": "Cinéma en plein air la Villette"
         },
         {
             "id": "C0061",
@@ -68,7 +68,7 @@
         },
         {
             "id": "C0403",
-            "name": "Cite de la Musique. Amphithéâtre du Musee"
+            "name": "Cite de la Musique"
         },
         {
             "id": "C0056",
@@ -76,7 +76,7 @@
         },
         {
             "id": "W7517",
-            "name": "Club de l&#039;Etoile"
+            "name": "Club de l'Etoile"
         },
         {
             "id": "C0071",
@@ -104,7 +104,7 @@
         },
         {
             "id": "W7513",
-            "name": "Fondation Jerome Seydoux - Pathé"
+            "name": "Fondation Jerome Seydoux"
         },
         {
             "id": "C0119",
@@ -112,7 +112,7 @@
         },
         {
             "id": "C0125",
-            "name": "Gaumont Opéra (côté Capucines)"
+            "name": "Gaumont Opéra (Capucines)"
         },
         {
             "id": "W1675",
@@ -120,7 +120,7 @@
         },
         {
             "id": "P5016",
-            "name": "Guimet - Musée national des arts asiatiques"
+            "name": "Guimet"
         },
         {
             "id": "W7523",
@@ -132,7 +132,7 @@
         },
         {
             "id": "W7506",
-            "name": "Institut Hongrois de Paris"
+            "name": "Institut Hongrois"
         },
         {
             "id": "W7588",
@@ -140,15 +140,15 @@
         },
         {
             "id": "C0134",
-            "name": "L&#039;Archipel"
+            "name": "L'Archipel"
         },
         {
             "id": "C0054",
-            "name": "L&#039;Arlequin"
+            "name": "L'Arlequin"
         },
         {
             "id": "C0005",
-            "name": "L&#039;Entrepôt"
+            "name": "L'Entrepôt"
         },
         {
             "id": "C1559",
@@ -164,7 +164,7 @@
         },
         {
             "id": "C0189",
-            "name": "La Géode - IMAX"
+            "name": "La Géode"
         },
         {
             "id": "C0009",
@@ -176,11 +176,11 @@
         },
         {
             "id": "C0073",
-            "name": "Le Champo - Espace Jacques Tati"
+            "name": "Le Champo"
         },
         {
             "id": "C0004",
-            "name": "Le Cinéma des Cinéastes"
+            "name": "Cinéma des Cinéastes"
         },
         {
             "id": "C0072",
@@ -192,7 +192,7 @@
         },
         {
             "id": "W7510",
-            "name": "Le Louxor - Palais du cinéma"
+            "name": "Le Louxor"
         },
         {
             "id": "W7512",
@@ -204,7 +204,7 @@
         },
         {
             "id": "C0096",
-            "name": "Le St Germain des Prés (ex Silencio des Prés)"
+            "name": "Le St Germain des Prés"
         },
         {
             "id": "C0095",
@@ -228,7 +228,7 @@
         },
         {
             "id": "C0178",
-            "name": "Maison de la Culture du Japon à Paris - MCJP"
+            "name": "Maison de la Culture du Japon"
         },
         {
             "id": "C0139",
@@ -244,11 +244,11 @@
         },
         {
             "id": "C0140",
-            "name": "MK2 Bastille (côté Beaumarchais)"
+            "name": "MK2 Bastille (Beaumarchais)"
         },
         {
             "id": "C0040",
-            "name": "MK2 Bastille (côté Fg St Antoine)"
+            "name": "MK2 Bastille (Fg St Antoine)"
         },
         {
             "id": "C0050",
@@ -276,11 +276,11 @@
         },
         {
             "id": "C0097",
-            "name": "MK2 Odéon (Côté St Germain)"
+            "name": "MK2 Odéon (St Germain)"
         },
         {
             "id": "C0092",
-            "name": "MK2 Odéon (Côté St Michel)"
+            "name": "MK2 Odéon (St Michel)"
         },
         {
             "id": "C0099",
@@ -296,7 +296,7 @@
         },
         {
             "id": "C0030",
-            "name": "Musee d&#039;Orsay, Auditorium"
+            "name": "Musee d'Orsay, Auditorium"
         },
         {
             "id": "C0041",
@@ -308,7 +308,7 @@
         },
         {
             "id": "C0037",
-            "name": "Pathé Alésia - Dolby Cinema"
+            "name": "Pathé Alésia"
         },
         {
             "id": "C0116",
@@ -316,11 +316,11 @@
         },
         {
             "id": "W7502",
-            "name": "Pathé Beaugrenelle - Dolby Cinema"
+            "name": "Pathé Beaugrenelle"
         },
         {
             "id": "C0060",
-            "name": "Pathé BNP Paribas (ex Opéra premier)"
+            "name": "Pathé BNP Paribas"
         },
         {
             "id": "C0161",
@@ -328,7 +328,7 @@
         },
         {
             "id": "W7520",
-            "name": "Pathé La Villette - IMAX"
+            "name": "Pathé La Villette"
         },
         {
             "id": "C0024",
@@ -344,7 +344,7 @@
         },
         {
             "id": "C0158",
-            "name": "Pathé Parnasse - Premium"
+            "name": "Pathé Parnasse"
         },
         {
             "id": "C0179",
@@ -364,7 +364,7 @@
         },
         {
             "id": "G0FQ4",
-            "name": "Royal Monceau - Raffles Paris"
+            "name": "Royal Monceau"
         },
         {
             "id": "C0100",
@@ -392,19 +392,19 @@
         },
         {
             "id": "C0026",
-            "name": "UGC Ciné Cité Bercy"
+            "name": "UGC Bercy"
         },
         {
             "id": "C0159",
-            "name": "UGC Ciné Cité Les Halles"
+            "name": "UGC Les Halles"
         },
         {
             "id": "C0175",
-            "name": "UGC Ciné Cité Maillot"
+            "name": "UGC Maillot"
         },
         {
             "id": "W7509",
-            "name": "UGC Ciné Cité Paris 19"
+            "name": "UGC Paris 19"
         },
         {
             "id": "C0102",

@@ -63,7 +63,7 @@ function TopBar(props: TopBarProps) {
 
   useEffect(() => {
     setProfiles(getAllProfiles());
-  }, []);
+  }, [props.selectedProfile]);
 
   return (
     <AppBar position="static" color="toolbar">

@@ -60,6 +60,7 @@ export default function SettingsPage({
     setProfiles(prev => [...prev, trimmed]);
     setProfileCinemas(prev => ({ ...prev, [trimmed]: [] }));
     setNewName('');
+    setSelectedProfile(trimmed);
   };
 
   // Remove a profile
