@@ -234,7 +234,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<TimelinePage selectedProfile={selectedProfile}/>} />
             <Route path="/all" element={<HomePage selectedProfile={selectedProfile}/>} />
-            <Route path="/movie/:id" element={<MoviePage selectedProfile={selectedProfile}/>} />
+            <Route path="/movie/:movie_id" element={<MoviePage selectedProfile={selectedProfile}/>} />
             <Route path="/profiles" element={<ProfilesPage
               selectedProfile={selectedProfile}
               setSelectedProfile={setSelectedProfile}/>} />

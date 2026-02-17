@@ -3,7 +3,7 @@ import { Container, Box } from '@mui/material';
 import { DayedSeances, IDedSeance } from './TimelinePage';
 import SeanceCard from './SeanceCard';
 import { MovieProps } from '../HomePage/Album';
-import { getProfile,isFavorite } from '../localStorage'; 
+import { getProfile,isBookmarked,isFavorite } from '../localStorage'; 
 import { useState } from 'react'; 
 import TextField from '@mui/material/TextField'; 
 
@@ -28,7 +28,8 @@ export default function Timeline(props: TimelineProps) {
     (_: IDedSeance) => (true),
     (seance: IDedSeance) => (!seance.seance.dubbed),
     (seance: IDedSeance) => (!seance.seance.subtitled),
-    (seance: IDedSeance) => (isFavorite(props.selectedProfile,props.movies[seance.movie_id].name))
+    (seance: IDedSeance) => (isFavorite(props.selectedProfile,props.movies[seance.movie_id].name)),
+    (seance: IDedSeance) => (isBookmarked(props.selectedProfile,seance))
     ];
 
     if (props.dayFilterId >= props.seances.length || !(props.movies)) {

@@ -11,19 +11,19 @@ export type MoviePageProps = {
 };
 
 export default function MoviePage({ selectedProfile }: MoviePageProps) {
-  const { id } = useParams();
+  const { movie_id } = useParams();
 
   let movie: MovieProps | null = null;
-  if (id) {
-    movie = movieById(id);
+  if (movie_id) {
+    movie = movieById(movie_id);
   }
 
-  if (movie && id) {
+  if (movie && movie_id) {
     return (
       <Box display={'flex'} flexDirection={'column'} justifySelf={"center"} marginLeft={2} paddingTop={4}>
         <MovieDescription movie={movie} selectedProfile={selectedProfile} />
         <Box paddingTop={6}>
-          <ShowingsList id={id} selectedProfile={selectedProfile} /> 
+          <ShowingsList movie_id={movie_id} selectedProfile={selectedProfile} /> 
         </Box>
       </Box>
     );

@@ -3,12 +3,6 @@ import { IDedSeance } from "./TimelinePage/TimelinePage";
 const SELECTED_KEY = 'selectedProfile';
 const PROFILES_KEY = 'userProfiles';
 
-
-export type Bookmark = {
-    seance: IDedSeance;
-    ttl: string;
-};
-
 /**
  * Deep comparison of two IDedSeance objects.
  * @param a first seance
@@ -38,7 +32,7 @@ export type Profile = {
     name: string,
     cinemas: string[],
     favorites: FavoriteMovie[],
-    bookmarks: Bookmark[]
+    bookmarks: IDedSeance[]
 }
 
 export function getSelectedProfile(): string | null {
@@ -92,7 +86,7 @@ export function getProfile(profileName: string): Profile | null {
     // Remove bookmarks whose ttl has passed
     if (profile.bookmarks) {
         const now = new Date();
-        const filtered = profile.bookmarks.filter(b => new Date(b.ttl) > now);
+        const filtered = profile.bookmarks.filter(b => new Date(b.seance.time) < now);
         if (filtered.length !== profile.bookmarks.length) {
             profile.bookmarks = filtered;
             addProfile(profile);
@@ -144,7 +138,7 @@ export function isFavorite(profileName: string, movieName: string): boolean {
 export function isBookmarked(profileName: string, seance: IDedSeance): boolean {
     const profile = getProfile(profileName);
     if (!profile || !profile.bookmarks) return false;
-    return profile.bookmarks.some(b => areSeancesEqual(b.seance, seance));
+    return profile.bookmarks.some(b => areSeancesEqual(b, seance));
 }
 
 /**
@@ -158,7 +152,7 @@ export function toggleBookmark(profileName: string, seance: IDedSeance, state: b
     const profile = getProfile(profileName);
     if (!profile) return;
     if (!profile.bookmarks) profile.bookmarks = [];
-    const index = profile.bookmarks.findIndex(b => areSeancesEqual(b.seance, seance));
+    const index = profile.bookmarks.findIndex(b => areSeancesEqual(b, seance));
     if (!state) {
         // remove existing bookmark if present
         if (index >= 0) profile.bookmarks.splice(index, 1);
@@ -167,7 +161,7 @@ export function toggleBookmark(profileName: string, seance: IDedSeance, state: b
         if (index < 0) {
             const ttlDate = new Date();
             ttlDate.setDate(ttlDate.getDate() + 7);
-            profile.bookmarks.push({ seance, ttl: ttlDate.toISOString() });
+            profile.bookmarks.push(seance);
         }
     }
     addProfile(profile); // persist updated profile

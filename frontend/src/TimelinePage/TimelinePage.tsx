@@ -24,7 +24,7 @@ export default function TimelinePage(props: {    selectedProfile: string
 }) {
     const [dayFilterId, setDayFilterId] = useState<number>(0);
     const [lgFilterId, setLgFilterId] = useState<number>(0);
-    const languages = ["Toutes les séances", "Non doublées", "Sans sous-titres","Films favoris"];
+    const languages = ["Toutes les séances", "Non doublées", "Sans sous-titres","Films favoris","Séances favories"];
 
 
     const movies: Record<string, MovieProps> = getMovies();
@@ -69,7 +69,7 @@ export default function TimelinePage(props: {    selectedProfile: string
 
     const seances: DayedSeances[] = dayed_seances;
 
-    const presentationText = "Découvrez les films diffusés à Rennes cette semaine!";
+    const presentationText = "Découvrez les films diffusés à Paris cette semaine!";
 
     return (
         <main>

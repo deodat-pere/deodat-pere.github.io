@@ -6,6 +6,7 @@ use crate::{config::Config, error::ServerError};
 use super::{extract::InfoSeance, scrape_cines::parse_all};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
+use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 
 pub fn refresh(config: &Config) -> Result<(), ServerError> {
     let infos_glob = parse_all(config).unwrap();
@@ -18,7 +19,7 @@ pub fn refresh(config: &Config) -> Result<(), ServerError> {
                     let mut hasher = DefaultHasher::new();
                     info.movie.title.hash(&mut hasher);
                     info.movie.duration.hash(&mut hasher);
-                    hasher.finish().to_string()
+                    URL_SAFE_NO_PAD.encode(hasher.finish().to_be_bytes())
                 },
                 runtime: info.movie.duration,
                 name: info.movie.title,

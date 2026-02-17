@@ -81,7 +81,7 @@ export default function SeanceCard(props: SeanceCardProps): JSX.Element {
                                     toggleBookmark(props.selectedProfile, { movie_id: props.movie.id, seance: props.seance }, !bookmarked);
                                     setBookmarked(!bookmarked);
                                 }}
-                                size="small"
+                                size="large"
                             >
                                 {bookmarked ? <BookmarkIcon color="primary" /> : <BookmarkBorderIcon />}
                             </IconButton>

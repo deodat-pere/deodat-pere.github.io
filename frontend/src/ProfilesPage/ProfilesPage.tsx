@@ -9,14 +9,14 @@ import {
   IconButton,
   Select,
   MenuItem,
-  FormControlLabel, // <-- new import
-  Checkbox,        // <-- new import
+  FormControlLabel,
+  Checkbox,
+  Switch,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { getLocations } from '../structTransform'; // <-- unchanged
+import { getLocations } from '../structTransform';
 import { getAllProfiles, addProfile, deleteProfile, getProfile } from '../localStorage';
 import type { Profile } from '../localStorage';
-
 
 type SettingsPageProps = {
   selectedProfile: string;
@@ -30,7 +30,8 @@ export default function SettingsPage({
   const [profiles, setProfiles] = useState<string[]>([]);
   const [newName, setNewName] = useState<string>('');
   const [profileCinemas, setProfileCinemas] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState<string>(''); // NEW
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [onlySelected, setOnlySelected] = useState<boolean>(false);
 
   // Load profiles on mount
   useEffect(() => {
@@ -141,35 +142,50 @@ export default function SettingsPage({
       </FormControl>
 
       {selectedProfile && (
-        <FormControl sx={{ mt: 3, minWidth: 200 }}>
-          <FormLabel component="legend">Cinémas</FormLabel>
+      <FormControl component="fieldset" sx={{ mt: 3, minWidth: 200 }}>
+        <FormLabel component="legend">Cinémas</FormLabel>
+        <Box sx={{ mt: 3, display: 'flex', alignItems: 'center' }}>
           <TextField
+            fullWidth
             placeholder="Rechercher un cinéma"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             size="small"
-            sx={{ mb: 1 }}
+            sx={{ mr: 2 }}
           />
-          <Box sx={{ maxHeight: 200, overflowY: 'auto', display: "flex", flexDirection: "column" }}>
-            {getLocations()
-              .filter((loc) =>
-                loc.toLowerCase().includes(searchTerm.toLowerCase())
-              )
-              .sort((a, b) => a.localeCompare(b))
-              .map((loc) => (
-                <FormControlLabel
-                  key={loc}
-                  control={
-                    <Checkbox
-                      checked={profileCinemas.includes(loc)}
-                      onChange={() => handleCinemaChange(loc)}
-                    />
-                  }
-                  label={loc}
-                />
-              ))}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={onlySelected}
+                onChange={(e) => setOnlySelected(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Mes cinémas"
+            sx={{ whiteSpace: 'nowrap' }}
+          />
           </Box>
-        </FormControl>
+        <Box sx={{ maxHeight: 200, overflowY: 'auto', display: "flex", flexDirection: "column" }}>
+          {getLocations()
+            .filter((loc) =>
+              loc.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+            .filter((loc) => !onlySelected || profileCinemas.includes(loc))
+            .sort((a, b) => a.localeCompare(b))
+            .map((loc) => (
+              <FormControlLabel
+                key={loc}
+                control={
+                  <Checkbox
+                    checked={profileCinemas.includes(loc)}
+                    onChange={() => handleCinemaChange(loc)}
+                  />
+                }
+                label={loc}
+              />
+            ))}
+        </Box>
+      </FormControl>
       )}
       </Box>
     </Box>

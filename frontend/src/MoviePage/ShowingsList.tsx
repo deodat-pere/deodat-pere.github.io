@@ -1,19 +1,13 @@
-import { Typography, Container, Divider, Box, Card, Chip } from "@mui/material";
-import { parse_date, parse_hour } from "../utils";
+import { Typography, Container, Divider, Box } from "@mui/material";
+import { parse_date } from "../utils";
 import { seanceById } from "../structTransform";
 import { getProfile } from '../localStorage'; 
+import ShowingCard from "./ShowingCard";
 
 export type ShowingsListProps = {
-    id: string,
+    movie_id: string,
     selectedProfile: string, 
 };
-
-export type PrettyShow = {
-    cine: string,
-    day: string,
-    hour: string,
-    tag: string,
-}
 
 export type ShowingProps = {
     cine: string,
@@ -25,8 +19,8 @@ export type ShowingProps = {
 export default function ShowingsList(props: ShowingsListProps) {
     let showings: ShowingProps[] | null = null;
 
-    if (props.id) {
-        showings = seanceById(props.id)
+    if (props.movie_id) {
+        showings = seanceById(props.movie_id)
     }
 
     const profileCinemas = props.selectedProfile
@@ -38,35 +32,17 @@ export default function ShowingsList(props: ShowingsListProps) {
             ? showings.filter(s => profileCinemas.includes(s.cine))
             : showings;
 
-        const mappings: Map<string, PrettyShow[]> = new Map;
+        const mappings: Map<string, ShowingProps[]> = new Map;
 
         filteredShowings.forEach((showing) => {
-            let tag = "VO";
-            if (showing.dubbed) {
-                tag = "VF"
-            } else {
-                tag = "VO"
-            }
             const d: string[] = parse_date(showing.time);
 
             const show_arr = mappings.get(d[0]);
             if (show_arr) {
-                const pshow: PrettyShow = {
-                    cine: showing.cine,
-                    day: d[1],
-                    hour: parse_hour(showing.time),
-                    tag: tag,
-                };
-                show_arr.push(pshow);
+                show_arr.push(showing);
                 mappings.set(d[0], show_arr);
             } else {
-                const pshow: PrettyShow = {
-                    cine: showing.cine,
-                    day: d[1],
-                    hour: parse_hour(showing.time),
-                    tag: tag,
-                };
-                mappings.set(d[0], [pshow]);
+                mappings.set(d[0], [showing]);
             }
         });
 
@@ -78,32 +54,18 @@ export default function ShowingsList(props: ShowingsListProps) {
                 </Typography>
                 <Container maxWidth="lg">
                     {unique_day_arr.sort().map((day: string) => (
-                        <div>
+                        <>
                             <Divider orientation="horizontal" flexItem />
                             < Typography variant="h6" align="left" color="text.primary" margin={1}>
                                 {parse_date(day)[1]}
                             </Typography>
                             <Box display="flex" flexDirection={"row"} flexWrap={"wrap"}>
-                                {mappings.get(day)?.sort((a, b) => (a.hour < b.hour ? -1 : 1)).map((props: PrettyShow) => (
-                                    <Box display={"flex"} margin={1} marginBottom={3}>
-                                        <Card sx={{ display: "flex", justifyContent: "space-between", flexDirection: "column" }}>
-                                            <Box display={"flex"} flexDirection={"row"} marginTop={1}>
-                                                < Typography align="left" color="text.primary" paddingLeft={1} paddingRight={1}>
-                                                    {props.hour}
-                                                </Typography>
-                                                {(props.tag == "VF") ? <></> : <Chip label={props.tag} size={"small"} variant={"outlined"} sx={{ marginRight: 1 }} />}
-                                            </Box>
-                                            <Box display={"flex"} flexDirection={"column-reverse"} marginBottom={1}>
-                                                < Typography align="left" color="text.secondary" paddingLeft={1} paddingRight={1}>
-                                                    {props.cine}
-                                                </Typography>
-                                            </Box>
-                                        </Card>
-                                    </Box>
+                                {mappings.get(day)?.sort((a, b) => (a.time < b.time ? -1 : 1)).map((showing: ShowingProps) => (
+                                   <ShowingCard showing={showing} movieId={props.movie_id} selectedProfile={props.selectedProfile}/> 
                                 ))
                                 }
                             </Box>
-                        </div>
+                        </>
                     ))
                     }
                 </Container >
