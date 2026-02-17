@@ -29,8 +29,8 @@ export default function MovieDescription(props: MovieDescriptionProps) {
     const [isFav, setIsFav] = useState(false);
 
     useEffect(() => {
-        setIsFav(isFavorite(props.selectedProfile, props.movie.name));
-    }, [props.selectedProfile, props.movie.name]);
+        setIsFav(isFavorite(props.selectedProfile, props.movie.id));
+    }, [props.selectedProfile, props.movie.id]);
 
     useEffect(() => {
         const escFunction = (event: KeyboardEvent) => {
@@ -79,7 +79,7 @@ export default function MovieDescription(props: MovieDescriptionProps) {
                         <IconButton
                             color="warning" size="large"
                             onClick={() => {
-                                toggleFavorites(props.selectedProfile, props.movie.name, !isFav);
+                                toggleFavorites(props.selectedProfile, props.movie.id, !isFav);
                                 setIsFav(prev => !prev);
                                 if (props.setIsFavParent) {
                                     props.setIsFavParent(prev => !prev);

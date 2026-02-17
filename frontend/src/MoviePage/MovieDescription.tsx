@@ -30,8 +30,8 @@ export default function MovieDescription(props: MovieDescriptionProps) {
     }, [props]);
 
     useEffect(() => {
-        setIsFav(isFavorite(props.selectedProfile, props.movie.name));
-    }, [props.selectedProfile, props.movie.name]);
+        setIsFav(isFavorite(props.selectedProfile, props.movie.id));
+    }, [props.selectedProfile, props.movie.id]);
 
     return (
         <Box
@@ -70,7 +70,7 @@ export default function MovieDescription(props: MovieDescriptionProps) {
                                 color="warning"
                                 size="large"
                                 onClick={() => {
-                                    toggleFavorites(props.selectedProfile, props.movie.name, !isFav);
+                                    toggleFavorites(props.selectedProfile, props.movie.id, !isFav);
                                     setIsFav(prev => !prev);
                                 }}
                             >

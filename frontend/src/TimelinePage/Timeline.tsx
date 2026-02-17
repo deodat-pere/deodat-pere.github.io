@@ -28,7 +28,7 @@ export default function Timeline(props: TimelineProps) {
     (_: IDedSeance) => (true),
     (seance: IDedSeance) => (!seance.seance.dubbed),
     (seance: IDedSeance) => (!seance.seance.subtitled),
-    (seance: IDedSeance) => (isFavorite(props.selectedProfile,props.movies[seance.movie_id].name)),
+    (seance: IDedSeance) => (isFavorite(props.selectedProfile,props.movies[seance.movie_id].id)),
     (seance: IDedSeance) => (isBookmarked(props.selectedProfile,seance))
     ];
 

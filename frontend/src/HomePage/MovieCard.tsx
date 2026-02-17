@@ -21,10 +21,10 @@ export default function MovieCard({props, selectedProfile}: {props: MovieProps, 
         navigate(path);
     }
 
-    const [favorite, setFavoriteState] = useState<boolean>(isFavorite(selectedProfile, props.name));
+    const [favorite, setFavoriteState] = useState<boolean>(isFavorite(selectedProfile, props.id));
     const toggleFav = () => {
         const newFav = !favorite;
-        toggleFavorites(selectedProfile, props.name, !favorite);
+        toggleFavorites(selectedProfile, props.id, !favorite);
         setFavoriteState(newFav);
     };
 

@@ -41,7 +41,7 @@ export default function Album(props: AlbumProps) {
         (movie: MovieProps) => (movie.is_new),
         (movie: MovieProps) => (movie.is_unique),
         (movie: MovieProps) => (movie.is_premiere),
-        (movie: MovieProps) => (isFavorite(props.selectedProfile,movie.name))
+        (movie: MovieProps) => (isFavorite(props.selectedProfile,movie.id))
     ]
 
     // Filter movies by profile cinemas if list is non‑empty
