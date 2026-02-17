@@ -8,11 +8,16 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Chip from '@mui/material/Chip';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder'; 
+import { toggleFavorites, isFavorite } from '../localStorage'; 
 
 export type MovieDescriptionProps = {
     movie: MovieProps,
     closePopup: React.Dispatch<React.SetStateAction<boolean>> | null,
+    selectedProfile: string,
+    setIsFavParent: React.Dispatch<React.SetStateAction<boolean>> | null,
 }
 
 export default function MovieDescription(props: MovieDescriptionProps) {
@@ -21,8 +26,11 @@ export default function MovieDescription(props: MovieDescriptionProps) {
         const path = `/movie/` + props.movie.id.toString();
         navigate(path);
     }
+    const [isFav, setIsFav] = useState(false);
 
-
+    useEffect(() => {
+        setIsFav(isFavorite(props.selectedProfile, props.movie.name));
+    }, [props.selectedProfile, props.movie.name]);
 
     useEffect(() => {
         const escFunction = (event: KeyboardEvent) => {
@@ -53,9 +61,11 @@ export default function MovieDescription(props: MovieDescriptionProps) {
         }}>
             <CardContent sx={{ display: "flex", flexDirection: "column", overflow: "auto" }} >
                 <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Typography gutterBottom variant="h5" component="h2" flexGrow={9}>
-                        {props.movie.name}
-                    </Typography>
+                    <Box display={"flex"} justifyItems={"flex-start"}>
+                        <Typography variant="h5" component="h2" flexGrow={9}>
+                            {props.movie.name}
+                        </Typography>
+                    </Box>
                     <Box flexGrow={1} display={"flex"} flexDirection={"row-reverse"}>
                         <IconButton
                             color="default" size="large"
@@ -65,6 +75,17 @@ export default function MovieDescription(props: MovieDescriptionProps) {
                                 }
                             }}>
                             <CloseIcon />
+                        </IconButton>
+                        <IconButton
+                            color="warning" size="large"
+                            onClick={() => {
+                                toggleFavorites(props.selectedProfile, props.movie.name, !isFav);
+                                setIsFav(prev => !prev);
+                                if (props.setIsFavParent) {
+                                    props.setIsFavParent(prev => !prev);
+                                }
+                            }}>
+                            {isFav ? <StarIcon /> : <StarBorderIcon />}
                         </IconButton>
                     </Box>
                 </Box>

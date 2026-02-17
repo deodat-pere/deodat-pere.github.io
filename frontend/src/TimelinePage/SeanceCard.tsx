@@ -8,6 +8,7 @@ import { get_image, parse_hour } from "../utils";
 export type SeanceCardProps = {
     seance: ShowingProps,
     movie: MovieProps,
+    selectedProfile: string,
 }
 
 export default function SeanceCard(props: SeanceCardProps): JSX.Element {
@@ -71,7 +72,7 @@ export default function SeanceCard(props: SeanceCardProps): JSX.Element {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <MovieDescription movie={props.movie} closePopup={setOpen} />
+                <MovieDescription movie={props.movie} closePopup={setOpen} selectedProfile={props.selectedProfile} setIsFavParent={null}/>
             </Modal>
         </>
     );

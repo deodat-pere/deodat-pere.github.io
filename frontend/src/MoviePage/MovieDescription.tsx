@@ -7,22 +7,31 @@ import { MovieProps } from '../HomePage/Album';
 import { get_image } from '../utils';
 import Chip from '@mui/material/Chip';
 import { useEffect, useState } from 'react';
+import StarIcon from '@mui/icons-material/Star'; 
+import StarBorderIcon from '@mui/icons-material/StarBorder'; 
+import IconButton from '@mui/material/IconButton'; 
+import { toggleFavorites, isFavorite } from '../localStorage'; 
 
 export type MovieDescriptionProps = {
     movie: MovieProps,
-}
+    selectedProfile: string, 
+};
 
 export default function MovieDescription(props: MovieDescriptionProps) {
-
     const [timeAndStars, setTimeAndStars] = useState<string>("");
+    const [isFav, setIsFav] = useState(false); 
 
     useEffect(() => {
         if (props.movie.id == -1) {
-            setTimeAndStars("")
+            setTimeAndStars("");
         } else {
-            setTimeAndStars(props.movie.runtime + " - " + props.movie.rating / 10 + "/5⭐")
+            setTimeAndStars(props.movie.runtime + " - " + props.movie.rating / 10 + "/5⭐");
         }
     }, [props]);
+
+    useEffect(() => {
+        setIsFav(isFavorite(props.selectedProfile, props.movie.name));
+    }, [props.selectedProfile, props.movie.name]);
 
     return (
         <Box
@@ -53,13 +62,22 @@ export default function MovieDescription(props: MovieDescriptionProps) {
             >
                 <CardContent sx={{ display: "flex", flexDirection: "column" }}>
                     <Box>
-                        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
                             <Typography gutterBottom variant="h5" component="h2" flexGrow={9}>
                                 {props.movie.name}
                             </Typography>
+                            <IconButton
+                                color="warning"
+                                size="large"
+                                onClick={() => {
+                                    toggleFavorites(props.selectedProfile, props.movie.name, !isFav);
+                                    setIsFav(prev => !prev);
+                                }}
+                            >
+                                {isFav ? <StarIcon /> : <StarBorderIcon />}
+                            </IconButton>
                         </Box>
                         <Box>
-
                             <Typography color="text.secondary">
                                 {timeAndStars}
                             </Typography>

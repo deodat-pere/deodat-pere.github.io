@@ -35,7 +35,7 @@ function get_button_style(selected: number, id: number): any {
 }
 
 export default function FilterSelector(props: FilterSelectorProps): JSX.Element {
-    const options = ["Tous les films", "Sorties de la semaine", "Diffusions uniques", "Avant premières"];
+    const options = ["Tous les films", "Sorties de la semaine", "Diffusions uniques", "Avant premières","Films favoris"];
     const opt_len = options.length;
 
     function handleClick(id: number) {

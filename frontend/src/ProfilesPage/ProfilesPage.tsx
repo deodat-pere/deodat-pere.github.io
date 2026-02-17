@@ -29,7 +29,8 @@ export default function SettingsPage({
 }: SettingsPageProps) {
   const [profiles, setProfiles] = useState<string[]>([]);
   const [newName, setNewName] = useState<string>('');
-  const [profileCinemas, setProfileCinemas] = useState<Record<string, string[]>>({});
+  const [profileCinemas, setProfileCinemas] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>(''); // NEW
 
   // Load profiles on mount
   useEffect(() => {
@@ -38,24 +39,24 @@ export default function SettingsPage({
     // Initialize cinemas for the currently selected profile
     if (selectedProfile) {
       const prof = getProfile(selectedProfile);
-      setProfileCinemas({ [selectedProfile]: prof?.cinemas ?? [] });
+      setProfileCinemas(prof?.cinemas ?? [] );
     }
   }, [selectedProfile]);
 
   // Update cinemas when selectedProfile changes
   useEffect(() => {
     if (!selectedProfile) {
-      setProfileCinemas({});
+      setProfileCinemas([]);
       return;
     }
     const prof = getProfile(selectedProfile);
-    setProfileCinemas({ [selectedProfile]: prof?.cinemas ?? [] });
+    setProfileCinemas( prof?.cinemas ?? [] );
   }, [selectedProfile]);
 
   const handleAdd = () => {
     const trimmed = newName.trim();
     if (!trimmed || profiles.includes(trimmed)) return;
-    const newProfile: Profile = { name: trimmed, cinemas: [] };
+    const newProfile: Profile = { name: trimmed, cinemas: [], favorites:[] };
     addProfile(newProfile);
     setProfiles(prev => [...prev, trimmed]);
     setProfileCinemas(prev => ({ ...prev, [trimmed]: [] }));
@@ -67,24 +68,22 @@ export default function SettingsPage({
   const handleDelete = (name: string) => {
     deleteProfile(name);
     setProfiles(prev => prev.filter(p => p !== name));
-    setProfileCinemas(prev => {
-      const newObj = { ...prev };
-      delete newObj[name];
-      return newObj;
-    });
     if (selectedProfile === name) setSelectedProfile('');
   };
 
   // Cinema selector change
   const handleCinemaChange = (cinema: string) => {
     setProfileCinemas(prev => {
-      const current = prev[selectedProfile] || [];
+      const current = prev || [];
       const updated = current.includes(cinema)
         ? current.filter(c => c !== cinema)
         : [...current, cinema];
       // Persist updated cinemas
-      addProfile({ name: selectedProfile, cinemas: updated });
-      return { ...prev, [selectedProfile]: updated };
+      const prof = getProfile(selectedProfile)
+      if (prof) {
+        addProfile({ ...prof, cinemas: updated });
+      }
+      return updated;
     });
   };
 
@@ -144,18 +143,32 @@ export default function SettingsPage({
       {selectedProfile && (
         <FormControl sx={{ mt: 3, minWidth: 200 }}>
           <FormLabel component="legend">Cinémas</FormLabel>
-          {getLocations().map((loc) => (
-            <FormControlLabel
-              key={loc}
-              control={
-                <Checkbox
-                  checked={profileCinemas[selectedProfile]?.includes(loc) ?? false}
-                  onChange={() => handleCinemaChange(loc)}
+          <TextField
+            placeholder="Rechercher un cinéma"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            size="small"
+            sx={{ mb: 1 }}
+          />
+          <Box sx={{ maxHeight: 200, overflowY: 'auto', display: "flex", flexDirection: "column" }}>
+            {getLocations()
+              .filter((loc) =>
+                loc.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .sort((a, b) => a.localeCompare(b))
+              .map((loc) => (
+                <FormControlLabel
+                  key={loc}
+                  control={
+                    <Checkbox
+                      checked={profileCinemas.includes(loc)}
+                      onChange={() => handleCinemaChange(loc)}
+                    />
+                  }
+                  label={loc}
                 />
-              }
-              label={loc}
-            />
-          ))}
+              ))}
+          </Box>
         </FormControl>
       )}
       </Box>

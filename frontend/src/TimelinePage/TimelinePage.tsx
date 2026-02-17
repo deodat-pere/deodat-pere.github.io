@@ -24,7 +24,7 @@ export default function TimelinePage(props: {    selectedProfile: string
 }) {
     const [dayFilterId, setDayFilterId] = useState<number>(0);
     const [lgFilterId, setLgFilterId] = useState<number>(0);
-    const languages = ["Toutes les séances", "Non doublées", "Sans sous-titres"];
+    const languages = ["Toutes les séances", "Non doublées", "Sans sous-titres","Films favoris"];
 
 
     const movies: MovieProps[] = getMovies();

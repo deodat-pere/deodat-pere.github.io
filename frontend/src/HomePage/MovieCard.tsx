@@ -1,11 +1,14 @@
-import { Card, Tooltip, CardMedia, CardContent, Box, Typography, Button, Modal } from "@mui/material";
+import { Card, Tooltip, CardMedia, CardContent, Box, Typography, Button, Modal, IconButton } from "@mui/material";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { get_image } from "../utils";
 import { MovieProps } from "./Album";
 import MovieDescription from "./MovieDescription";
+import { isFavorite, toggleFavorites } from '../localStorage';
+import StarIcon from '@mui/icons-material/Star'; 
+import StarBorderIcon from '@mui/icons-material/StarBorder'; 
 
-export default function MovieCard(props: MovieProps): JSX.Element {
+export default function MovieCard({props, selectedProfile}: {props: MovieProps, selectedProfile: string}): JSX.Element {
     const [open, setOpen] = useState<boolean>(false);
     const [lineClamp, setLineClamp] = useState<number>(3);
     const cardRef = useRef<HTMLDivElement>(null);
@@ -17,6 +20,13 @@ export default function MovieCard(props: MovieProps): JSX.Element {
         const path = '/movie/' + props.id.toString();
         navigate(path);
     }
+
+    const [favorite, setFavoriteState] = useState<boolean>(isFavorite(selectedProfile, props.name));
+    const toggleFav = () => {
+        const newFav = !favorite;
+        toggleFavorites(selectedProfile, props.name, !favorite);
+        setFavoriteState(newFav);
+    };
 
     useEffect(() => {
         const adjustLineClamp = () => {
@@ -68,9 +78,14 @@ export default function MovieCard(props: MovieProps): JSX.Element {
             </Tooltip>
             <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", }}>
                 <Box display={"flex"} flexDirection={"column"}>
+                     <Box display={"flex"} flexDirection={"row"} justifyContent={"flex-start"}>
                     <Typography gutterBottom variant="h5" component="h2">
                         {props.name}
                     </Typography>
+                     <IconButton onClick={toggleFav} size="large">
+                        {favorite ? <StarIcon color="warning" /> : <StarBorderIcon />}
+                    </IconButton>
+                    </Box>
                     <Typography color="text.secondary">
                         {props.runtime}
                     </Typography>
@@ -119,7 +134,7 @@ export default function MovieCard(props: MovieProps): JSX.Element {
                         aria-labelledby="modal-modal-title"
                         aria-describedby="modal-modal-description"
                     >
-                        <MovieDescription movie={props} closePopup={setOpen} />
+                        <MovieDescription movie={props} closePopup={setOpen} selectedProfile={selectedProfile} setIsFavParent={toggleFav}/>
                     </Modal>
                 </Box>
             </CardContent>

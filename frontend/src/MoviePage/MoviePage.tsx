@@ -21,7 +21,7 @@ export default function MoviePage({ selectedProfile }: MoviePageProps) {
   if (movie && id) {
     return (
       <Box display={'flex'} flexDirection={'column'} justifySelf={"center"} marginLeft={2} paddingTop={4}>
-        <MovieDescription movie={movie} />
+        <MovieDescription movie={movie} selectedProfile={selectedProfile} />
         <Box paddingTop={6}>
           <ShowingsList id={id} selectedProfile={selectedProfile} /> 
         </Box>
