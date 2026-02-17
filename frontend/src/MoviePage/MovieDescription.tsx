@@ -22,7 +22,7 @@ export default function MovieDescription(props: MovieDescriptionProps) {
     const [isFav, setIsFav] = useState(false); 
 
     useEffect(() => {
-        if (props.movie.id == -1) {
+        if (props.movie.id == "fakeMovie") {
             setTimeAndStars("");
         } else {
             setTimeAndStars(props.movie.runtime + " - " + props.movie.rating / 10 + "/5⭐");

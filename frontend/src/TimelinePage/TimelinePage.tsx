@@ -11,7 +11,7 @@ import { Chip, Divider } from '@mui/material';
 import { getMovies, getSeances } from '../structTransform';
 
 export type IDedSeance = {
-    id: number,
+    movie_id: string,
     seance: ShowingProps,
 }
 
@@ -27,7 +27,7 @@ export default function TimelinePage(props: {    selectedProfile: string
     const languages = ["Toutes les séances", "Non doublées", "Sans sous-titres","Films favoris"];
 
 
-    const movies: MovieProps[] = getMovies();
+    const movies: Record<string, MovieProps> = getMovies();
 
 
     const jsonData: IDedSeance[] = getSeances();

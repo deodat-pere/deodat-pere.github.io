@@ -12,7 +12,7 @@ export type TimelineProps = {
     dayFilterId: number,
     lgFilterId: number,
     seances: DayedSeances[],
-    movies: MovieProps[],
+    movies: Record<string, MovieProps>,
     selectedProfile: string,
 }
 
@@ -28,7 +28,7 @@ export default function Timeline(props: TimelineProps) {
     (_: IDedSeance) => (true),
     (seance: IDedSeance) => (!seance.seance.dubbed),
     (seance: IDedSeance) => (!seance.seance.subtitled),
-    (seance: IDedSeance) => (isFavorite(props.selectedProfile,props.movies[seance.id].name))
+    (seance: IDedSeance) => (isFavorite(props.selectedProfile,props.movies[seance.movie_id].name))
     ];
 
     if (props.dayFilterId >= props.seances.length || !(props.movies)) {
@@ -50,10 +50,10 @@ export default function Timeline(props: TimelineProps) {
                         .sort((a, b) => (a.seance.time.localeCompare(b.seance.time)))
                         .filter(filters[props.lgFilterId])
                         .filter(seance => allowedCinemas.length > 0 ? allowedCinemas.includes(seance.seance.cine) : true)
-                        .filter(seance => props.movies[seance.id].name.toLowerCase().includes(search.toLowerCase()))
+                        .filter(seance => props.movies[seance.movie_id].name.toLowerCase().includes(search.toLowerCase()))
                         .map((seance: IDedSeance) => (
-                            <Grid key={seance.seance.time + seance.seance.cine + seance.seance.dubbed + seance.id} size={4}>
-                                <SeanceCard seance={seance.seance} movie={props.movies[seance.id]} selectedProfile={props.selectedProfile}/>
+                            <Grid key={seance.seance.time + seance.seance.cine + seance.seance.dubbed + seance.movie_id} size={4}>
+                                <SeanceCard seance={seance.seance} movie={props.movies[seance.movie_id]} selectedProfile={props.selectedProfile}/>
                             </Grid>
                         ))}
                 </Grid>

@@ -8,7 +8,7 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box'; 
 
 export type MovieProps = {
-    id: number;
+    id: string;
     runtime: string,
     name: string;
     summary: string;
@@ -46,8 +46,8 @@ export default function Album(props: AlbumProps) {
 
     // Filter movies by profile cinemas if list is non‑empty
     const filteredMovies = profileCinemas.length > 0
-        ? movies.filter(movie => movie.cinemas.some(c => profileCinemas.includes(c)))
-        : movies;
+        ? Object.values(movies).filter(movie => movie.cinemas.some(c => profileCinemas.includes(c)))
+        : Object.values(movies);
 
     const [search, setSearch] = useState('');
 

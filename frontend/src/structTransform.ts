@@ -5,13 +5,13 @@ import { IDedSeance } from './TimelinePage/TimelinePage';
 // URL of the remote JSON
 const MOVIES_URL = 'https://raw.githubusercontent.com/deodat-pere/deodat-pere.github.io/refs/heads/gh-pages/assets/movies.json';
 
-// Holds the parsed data once loaded
-let orderedMovies: Array<{ movie: MovieProps; dates: ShowingProps[] }> | null = null;
+// Holds the parsed data once loaded as a dictionary keyed by movie id
+let orderedMovies: Record<string, { movie: MovieProps; dates: ShowingProps[] }> | null = null;
 
 type FetchedType = {
     movies: Array<{
         movie: { 
-            id: number;
+          id: string;
             runtime: string;
             name: string;
             summary: string;
@@ -35,15 +35,15 @@ export async function loadMovies(): Promise<void> {
   
   const response = await fetch(MOVIES_URL);
   const json: FetchedType = await response.json();
-  orderedMovies = structuredClone(json.movies)
-    .sort((a, b) => (a.movie.id - b.movie.id))
-    .map(el => {
-      const cinemas = Array.from(new Set(el.dates.map(d => d.cine)));
-      return {
-        ...el,
-        movie: { ...el.movie, cinemas } as MovieProps,
-      };
-    });
+  const dict: Record<string, { movie: MovieProps; dates: ShowingProps[] }> = {};
+  json.movies.forEach(el => {
+    const cinemas = Array.from(new Set(el.dates.map(d => d.cine)));
+    dict[el.movie.id] = {
+      movie: { ...el.movie, cinemas } as MovieProps,
+      dates: el.dates,
+    };
+  });
+  orderedMovies = dict;
 }
 
 /**
@@ -55,21 +55,21 @@ function ensureLoaded(): void {
   }
 }
 
-export function getMovies(): MovieProps[] {
+export function getMovies(): Record<string, MovieProps> {
   ensureLoaded();
-  const movies: MovieProps[] = [];
-  orderedMovies!.forEach(element => {
-    movies.push(element.movie);
+  const result: Record<string, MovieProps> = {};
+  Object.entries(orderedMovies!).forEach(([id, val]) => {
+    result[id] = val.movie;
   });
-  return movies;
+  return result;
 }
 
-export function movieById(id: number): MovieProps {
+export function movieById(id: string): MovieProps {
   ensureLoaded();
   return orderedMovies![id].movie;
 }
 
-export function seanceById(id: number): ShowingProps[] {
+export function seanceById(id: string): ShowingProps[] {
   ensureLoaded();
   return orderedMovies![id].dates;
 }
@@ -77,11 +77,11 @@ export function seanceById(id: number): ShowingProps[] {
 export function getSeances(): IDedSeance[] {
   ensureLoaded();
   const seances: IDedSeance[] = [];
-  orderedMovies!.forEach(element => {
+  Object.values(orderedMovies!).forEach(element => {
     element.dates.forEach(seance => {
       seances.push({
-        id: element.movie.id,
-        seance: seance,
+        movie_id: element.movie.id,
+        seance,
       });
     });
   });
@@ -91,7 +91,7 @@ export function getSeances(): IDedSeance[] {
 export function getLocations(): string[] {
   ensureLoaded();
   const locations = new Set<string>();
-  orderedMovies!.forEach(movie => {
+  Object.values(orderedMovies!).map(movie => {
     movie.dates.forEach(date => {
       locations.add(date.cine);
     });

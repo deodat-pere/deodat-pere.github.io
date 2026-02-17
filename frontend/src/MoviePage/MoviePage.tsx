@@ -15,7 +15,7 @@ export default function MoviePage({ selectedProfile }: MoviePageProps) {
 
   let movie: MovieProps | null = null;
   if (id) {
-    movie = movieById(Number(id));
+    movie = movieById(id);
   }
 
   if (movie && id) {

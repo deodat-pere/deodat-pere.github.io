@@ -1,5 +1,33 @@
+import { IDedSeance } from "./TimelinePage/TimelinePage";
+
 const SELECTED_KEY = 'selectedProfile';
 const PROFILES_KEY = 'userProfiles';
+
+
+export type Bookmark = {
+    seance: IDedSeance;
+    ttl: string;
+};
+
+/**
+ * Deep comparison of two IDedSeance objects.
+ * @param a first seance
+ * @param b second seance
+ * @returns true if all fields are equal
+ */
+function areSeancesEqual(a: IDedSeance, b: IDedSeance): boolean {
+    // Compare id
+    if (a.movie_id !== b.movie_id) return false;
+    // Compare nested seance fields
+    const aSe = a.seance;
+    const bSe = b.seance;
+    // Assuming ShowingProps has primitive fields; perform shallow comparison
+    const keys = Object.keys(aSe) as (keyof typeof aSe)[];
+    for (const key of keys) {
+        if (aSe[key] !== bSe[key]) return false;
+    }
+    return true;
+}
 
 export type FavoriteMovie = {
     name: string;
@@ -9,7 +37,8 @@ export type FavoriteMovie = {
 export type Profile = {
     name: string,
     cinemas: string[],
-    favorites: FavoriteMovie[]
+    favorites: FavoriteMovie[],
+    bookmarks: Bookmark[]
 }
 
 export function getSelectedProfile(): string | null {
@@ -60,6 +89,15 @@ export function getProfile(profileName: string): Profile | null {
             addProfile(profile);
         }
     }
+    // Remove bookmarks whose ttl has passed
+    if (profile.bookmarks) {
+        const now = new Date();
+        const filtered = profile.bookmarks.filter(b => new Date(b.ttl) > now);
+        if (filtered.length !== profile.bookmarks.length) {
+            profile.bookmarks = filtered;
+            addProfile(profile);
+        }
+    }
     return profile;
 }
 
@@ -94,5 +132,44 @@ export function isFavorite(profileName: string, movieName: string): boolean {
     const profile = getProfile(profileName);
     if (!profile || !profile.favorites) return false;
     return profile.favorites.some(f => f.name === movieName);
+}
+
+
+/**
+ * Checks whether a given IDedSeance is in the bookmarks list of a profile.
+ * @param profileName - The name of the profile to check.
+ * @param seance - The seance to look for in bookmarks.
+ * @returns {boolean} true if the seance is bookmarked, false otherwise.
+ */
+export function isBookmarked(profileName: string, seance: IDedSeance): boolean {
+    const profile = getProfile(profileName);
+    if (!profile || !profile.bookmarks) return false;
+    return profile.bookmarks.some(b => areSeancesEqual(b.seance, seance));
+}
+
+/**
+ * Toggles a bookmark in the bookmarks list of a profile.
+ * If the seance is already bookmarked, it will be removed; otherwise it will be added with a TTL of one week from now.
+ * @param profileName - The name of the profile to update.
+ * @param seance - The seance to toggle in bookmarks.
+ * @param state - If true, add the bookmark; if false, remove it.
+ */
+export function toggleBookmark(profileName: string, seance: IDedSeance, state: boolean): void {
+    const profile = getProfile(profileName);
+    if (!profile) return;
+    if (!profile.bookmarks) profile.bookmarks = [];
+    const index = profile.bookmarks.findIndex(b => areSeancesEqual(b.seance, seance));
+    if (!state) {
+        // remove existing bookmark if present
+        if (index >= 0) profile.bookmarks.splice(index, 1);
+    } else {
+        // add bookmark if not present
+        if (index < 0) {
+            const ttlDate = new Date();
+            ttlDate.setDate(ttlDate.getDate() + 7);
+            profile.bookmarks.push({ seance, ttl: ttlDate.toISOString() });
+        }
+    }
+    addProfile(profile); // persist updated profile
 }
 

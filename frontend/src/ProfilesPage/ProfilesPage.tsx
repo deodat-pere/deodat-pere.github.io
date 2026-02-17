@@ -56,7 +56,7 @@ export default function SettingsPage({
   const handleAdd = () => {
     const trimmed = newName.trim();
     if (!trimmed || profiles.includes(trimmed)) return;
-    const newProfile: Profile = { name: trimmed, cinemas: [], favorites:[] };
+    const newProfile: Profile = { name: trimmed, cinemas: [], favorites:[], bookmarks: [] };
     addProfile(newProfile);
     setProfiles(prev => [...prev, trimmed]);
     setProfileCinemas(prev => ({ ...prev, [trimmed]: [] }));

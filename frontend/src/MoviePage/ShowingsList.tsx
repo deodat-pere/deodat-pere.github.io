@@ -25,8 +25,8 @@ export type ShowingProps = {
 export default function ShowingsList(props: ShowingsListProps) {
     let showings: ShowingProps[] | null = null;
 
-    if (Number(props.id)) {
-        showings = seanceById(Number(props.id))
+    if (props.id) {
+        showings = seanceById(props.id)
     }
 
     const profileCinemas = props.selectedProfile

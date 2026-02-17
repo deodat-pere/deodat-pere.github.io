@@ -4,15 +4,22 @@ use tracing::{info, warn};
 use crate::{config::Config, error::ServerError};
 
 use super::{extract::InfoSeance, scrape_cines::parse_all};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 pub fn refresh(config: &Config) -> Result<(), ServerError> {
     let infos_glob = parse_all(config).unwrap();
 
     let mut movies = Vec::new();
-    for (id, (_, info)) in infos_glob.into_iter().enumerate() {
+    for (_, info) in infos_glob.into_iter() {
         movies.push(DetailedInfo {
             movie: DetailedMovie {
-                id: id as u32,
+                id: {
+                    let mut hasher = DefaultHasher::new();
+                    info.movie.title.hash(&mut hasher);
+                    info.movie.duration.hash(&mut hasher);
+                    hasher.finish().to_string()
+                },
                 runtime: info.movie.duration,
                 name: info.movie.title,
                 image_link: info.movie.image,
@@ -49,7 +56,7 @@ struct StoredInfos {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub(crate) struct DetailedMovie {
-    id: u32,
+    id: String,
     runtime: String,
     name: String,
     image_link: String,

@@ -14,7 +14,7 @@ export const not_found_movie_props: MovieProps = {
     summary: "",
     image_link: "",
     release_date: "",
-    id: -1,
+    id: "fakeMovie",
     is_new: false,
     is_premiere: false,
     is_unique: false,
