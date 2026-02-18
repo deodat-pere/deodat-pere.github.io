@@ -86,10 +86,10 @@ export function getProfile(profileName: string): Profile | null {
     // Remove bookmarks whose ttl has passed
     if (profile.bookmarks) {
         const now = new Date();
-        const filtered = profile.bookmarks.filter(b => new Date(b.seance.time) < now);
+        const filtered = profile.bookmarks.filter(b => new Date(b.seance.time) > now);
         if (filtered.length !== profile.bookmarks.length) {
             profile.bookmarks = filtered;
-            addProfile(profile);
+            addProfile(profile)
         }
     }
     return profile;
