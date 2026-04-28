@@ -9,7 +9,64 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      quiz_only: ${{ steps.detect.outputs.quiz_only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Detect quiz-only push
+        id: detect
+        run: |
+          # Cron and manual runs always go through the full build.
+          if [ "${{ github.event_name }}" != "push" ]; then
+            echo "quiz_only=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          before="${{ github.event.before }}"
+          if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ]; then
+            echo "quiz_only=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          changed=$(git diff --name-only "$before" "$GITHUB_SHA")
+          echo "Changed files:"; echo "$changed"
+          if [ -z "$changed" ] || \
+             echo "$changed" | grep -qvE '^frontend/public/metro-quiz(\.html$|/)'; then
+            echo "quiz_only=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "quiz_only=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  quiz-only-deploy:
+    needs: detect
+    if: needs.detect.outputs.quiz_only == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: src
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: pages
+      - name: Patch quiz on gh-pages
+        working-directory: pages
+        run: |
+          git config user.name "GithubAction"
+          git config user.email "username@users.noreply.github.com"
+          rm -rf metro-quiz metro-quiz.html
+          cp ../src/frontend/public/metro-quiz.html .
+          cp -r ../src/frontend/public/metro-quiz .
+          git add metro-quiz.html metro-quiz
+          if git diff --cached --quiet; then
+            echo "No quiz changes to deploy"; exit 0
+          fi
+          git commit -m "Quiz update ${GITHUB_SHA::7}"
+          git push origin gh-pages
+
+  full-deploy:
+    needs: detect
+    if: needs.detect.outputs.quiz_only != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
