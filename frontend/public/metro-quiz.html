@@ -102,12 +102,23 @@
   #end-screen h2 { margin: 0 0 8px; font-size: 2em; }
   #end-screen .score-line { font-size: 1.3em; margin: 8px 0; }
   #end-screen .record { font-size: 1em; opacity: 0.85; margin: 4px 0 24px; }
+  .end-buttons {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    justify-content: center;
+  }
   #replay-btn {
     background: #e94560; color: white; border: none;
-    padding: 12px 36px; font-size: 1.05em; font-weight: 600;
+    padding: 12px 28px; font-size: 1.05em; font-weight: 600;
     border-radius: 6px; cursor: pointer;
   }
   #replay-btn:hover { background: #ff5773; }
+  #explore-btn {
+    background: transparent; color: white;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 12px 24px; font-size: 1.05em; font-weight: 500;
+    border-radius: 6px; cursor: pointer;
+  }
+  #explore-btn:hover { background: rgba(255, 255, 255, 0.1); }
 
   @media (max-width: 480px) {
     #prompt { font-size: 1.25em; }
@@ -217,32 +228,31 @@
   }
 
   function updateScore() {
+    const answered = total - order.length;
     scoreEl.textContent =
-      'Question ' + (index + 1) + ' / ' + total +
-      ' · ' + correct + ' juste' + (correct === 1 ? '' : 's');
+      answered + ' / ' + total + ' répondues · ' +
+      correct + ' juste' + (correct === 1 ? '' : 's');
   }
 
   function showPrompt() {
-    if (index >= total) {
-      endGame();
-      return;
-    }
-    if (index < 0) index = 0;
+    if (order.length === 0) return;
+    if (index < 0) index = order.length - 1;
+    if (index >= order.length) index = 0;
     currentName = order[index];
     promptEl.textContent = '« ' + currentName + ' »';
     updateScore();
-    prevBtn.disabled = index === 0;
   }
 
+  // Navigation wraps circularly through the still-unanswered stations.
   function goPrev() {
-    if (busy || total === 0 || index <= 0) return;
-    index--;
+    if (busy || order.length === 0) return;
+    index = (index - 1 + order.length) % order.length;
     showPrompt();
   }
 
   function goNext() {
-    if (busy || total === 0) return;
-    index++;
+    if (busy || order.length === 0) return;
+    index = (index + 1) % order.length;
     showPrompt();
   }
 
@@ -277,7 +287,18 @@
     if (isCorrect) correct++;
     updateScore();
 
-    setTimeout(() => { busy = false; goNext(); }, 350);
+    setTimeout(() => {
+      busy = false;
+      // The just-answered station drops out of the navigable list.
+      // After this splice, `index` either points to what was the next
+      // station, or sits past the end (handled by showPrompt's wrap).
+      order.splice(index, 1);
+      if (order.length === 0) {
+        endGame();
+        return;
+      }
+      showPrompt();
+    }, 350);
   }
 
   function resetDots() {
@@ -295,6 +316,8 @@
     order = shuffle([...dots.keys()]);
     total = order.length;
     index = 0;
+    prevBtn.disabled = false;
+    nextBtn.disabled = false;
     const ov = document.getElementById('end-screen');
     if (ov) ov.remove();
     startTimer();
@@ -306,6 +329,8 @@
 
   function endGame() {
     stopTimer();
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
     promptEl.textContent = 'Terminé !';
     scoreEl.textContent = correct + ' / ' + total + ' bonnes réponses';
 
@@ -323,9 +348,13 @@
       '<div class="score-line">' + correct + ' / ' + total + ' bonnes réponses</div>' +
       '<div class="score-line">Temps : ' + fmtTime(elapsedMs) + '</div>' +
       (recordLine ? '<div class="record">' + recordLine + '</div>' : '') +
-      '<button id="replay-btn">Rejouer</button>';
+      '<div class="end-buttons">' +
+        '<button id="replay-btn" type="button">Rejouer</button>' +
+        '<button id="explore-btn" type="button">Explorer la carte</button>' +
+      '</div>';
     document.body.appendChild(overlay);
     document.getElementById('replay-btn').onclick = startGame;
+    document.getElementById('explore-btn').onclick = () => overlay.remove();
   }
 
   function buildStations(stationsGeo, lineColors) {
