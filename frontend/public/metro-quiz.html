@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Métro Parisien</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    overflow: hidden;
+  }
+  #app { display: flex; flex-direction: column; height: 100vh; }
+  header {
+    padding: 10px 16px 12px;
+    background: #1a1a2e;
+    color: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 500;
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 0.85em;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.65;
+  }
+  #timer {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 1.1em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .prompt-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0 2px;
+  }
+  #prompt {
+    flex: 1;
+    font-size: 1.5em;
+    font-weight: 600;
+    line-height: 1.2;
+    min-height: 1.2em;
+    text-align: center;
+  }
+  .nav-btn {
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.4em;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    flex: 0 0 auto;
+    transition: background 0.15s;
+  }
+  .nav-btn:hover:not(:disabled),
+  .nav-btn:focus-visible:not(:disabled) {
+    background: rgba(255, 255, 255, 0.25);
+    outline: none;
+  }
+  .nav-btn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+  #score {
+    font-size: 0.9em;
+    opacity: 0.8;
+  }
+  #map { flex: 1; background: #f4f4f4; }
+  #map.loading { opacity: 0.4; }
+
+  .station-dot { cursor: pointer; }
+
+  #end-screen {
+    position: fixed; inset: 0;
+    background: rgba(26, 26, 46, 0.94);
+    color: white;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+    text-align: center;
+  }
+  #end-screen h2 { margin: 0 0 8px; font-size: 2em; }
+  #end-screen .score-line { font-size: 1.3em; margin: 8px 0; }
+  #end-screen .record { font-size: 1em; opacity: 0.85; margin: 4px 0 24px; }
+  #replay-btn {
+    background: #e94560; color: white; border: none;
+    padding: 12px 36px; font-size: 1.05em; font-weight: 600;
+    border-radius: 6px; cursor: pointer;
+  }
+  #replay-btn:hover { background: #ff5773; }
+
+  @media (max-width: 480px) {
+    #prompt { font-size: 1.25em; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="header-top">
+      <h1>Quiz Métro Parisien</h1>
+      <div id="timer">00:00</div>
+    </div>
+    <div class="prompt-row">
+      <button id="prev-btn" class="nav-btn" type="button" aria-label="Question précédente">‹</button>
+      <div id="prompt">Chargement…</div>
+      <button id="next-btn" class="nav-btn" type="button" aria-label="Question suivante">›</button>
+    </div>
+    <div id="score">&nbsp;</div>
+  </header>
+  <div id="map" class="loading"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function () {
+  'use strict';
+
+  const PARIS_CENTER = [48.8566, 2.3522];
+  const BEST_KEY = 'metro-quiz:best';
+
+  const promptEl = document.getElementById('prompt');
+  const scoreEl  = document.getElementById('score');
+  const mapEl    = document.getElementById('map');
+
+  const map = L.map('map', {
+    center: PARIS_CENTER,
+    zoom: 12,
+    minZoom: 11,
+    maxZoom: 17,
+    maxBounds: [[48.70, 2.05], [49.00, 2.70]],
+    maxBoundsViscosity: 0.8,
+    zoomControl: true,
+  });
+
+  // Carto "Positron no labels": light, neutral background with no street
+  // names or place labels — keeps the quiz honest.
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+    attribution:
+      '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · ' +
+      '© <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(map);
+
+  // Game state
+  let dots = new Map();   // stationName -> { layer, baseStyle, answered }
+  let order = [];         // shuffled list of station names
+  let index = 0;          // cursor into `order`
+  let currentName = null;
+  let total = 0;
+  let correct = 0;
+  let busy = false;
+  let timerStart = 0;
+  let timerInterval = null;
+  let elapsedMs = 0;
+
+  const timerEl = document.getElementById('timer');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function fmtTime(ms) {
+    const total = Math.floor(ms / 1000);
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  }
+
+  function tickTimer() {
+    elapsedMs = Date.now() - timerStart;
+    timerEl.textContent = fmtTime(elapsedMs);
+  }
+
+  function startTimer() {
+    timerStart = Date.now();
+    elapsedMs = 0;
+    timerEl.textContent = '00:00';
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(tickTimer, 250);
+  }
+
+  function stopTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = null;
+    elapsedMs = Date.now() - timerStart;
+    timerEl.textContent = fmtTime(elapsedMs);
+  }
+
+  function updateScore() {
+    scoreEl.textContent =
+      'Question ' + (index + 1) + ' / ' + total +
+      ' · ' + correct + ' juste' + (correct === 1 ? '' : 's');
+  }
+
+  function showPrompt() {
+    if (index >= total) {
+      endGame();
+      return;
+    }
+    if (index < 0) index = 0;
+    currentName = order[index];
+    promptEl.textContent = '« ' + currentName + ' »';
+    updateScore();
+    prevBtn.disabled = index === 0;
+  }
+
+  function goPrev() {
+    if (busy || total === 0 || index <= 0) return;
+    index--;
+    showPrompt();
+  }
+
+  function goNext() {
+    if (busy || total === 0) return;
+    index++;
+    showPrompt();
+  }
+
+  function revealStation(entry, name, isCorrect) {
+    const color = isCorrect ? '#22c55e' : '#e94560';
+    entry.layer.setStyle({
+      ...entry.baseStyle,
+      fillColor: color,
+      color: 'white',
+      weight: 2,
+      radius: 7,
+      fillOpacity: 1,
+    });
+    entry.layer.bringToFront();
+    entry.layer.bindTooltip(name, { direction: 'top', sticky: false });
+    entry.answered = true;
+  }
+
+  function onDotClick(name) {
+    if (busy || currentName == null) return;
+    if (dots.get(name).answered) return; // already revealed; let tooltip handle it
+    busy = true;
+
+    const correctEntry = dots.get(currentName);
+    const isCorrect = name === currentName;
+
+    // The marker always lands on the correct station — green if the player
+    // got it, red if they missed. Either way, station name is revealed on
+    // hover from now on.
+    revealStation(correctEntry, currentName, isCorrect);
+
+    if (isCorrect) correct++;
+    updateScore();
+
+    setTimeout(() => { busy = false; goNext(); }, 350);
+  }
+
+  function resetDots() {
+    for (const entry of dots.values()) {
+      entry.layer.setStyle(entry.baseStyle);
+      entry.layer.unbindTooltip();
+      entry.answered = false;
+    }
+  }
+
+  function startGame() {
+    correct = 0;
+    busy = false;
+    resetDots();
+    order = shuffle([...dots.keys()]);
+    total = order.length;
+    index = 0;
+    const ov = document.getElementById('end-screen');
+    if (ov) ov.remove();
+    startTimer();
+    showPrompt();
+  }
+
+  prevBtn.addEventListener('click', goPrev);
+  nextBtn.addEventListener('click', goNext);
+
+  function endGame() {
+    stopTimer();
+    promptEl.textContent = 'Terminé !';
+    scoreEl.textContent = correct + ' / ' + total + ' bonnes réponses';
+
+    const prev = parseInt(localStorage.getItem(BEST_KEY) || '0', 10);
+    const isNew = correct > prev;
+    if (isNew) localStorage.setItem(BEST_KEY, String(correct));
+
+    const overlay = document.createElement('div');
+    overlay.id = 'end-screen';
+    const recordLine = isNew
+      ? 'Nouveau record !'
+      : (prev > 0 ? 'Record : ' + prev + ' / ' + total : '');
+    overlay.innerHTML =
+      '<h2>Terminé !</h2>' +
+      '<div class="score-line">' + correct + ' / ' + total + ' bonnes réponses</div>' +
+      '<div class="score-line">Temps : ' + fmtTime(elapsedMs) + '</div>' +
+      (recordLine ? '<div class="record">' + recordLine + '</div>' : '') +
+      '<button id="replay-btn">Rejouer</button>';
+    document.body.appendChild(overlay);
+    document.getElementById('replay-btn').onclick = startGame;
+  }
+
+  function buildStations(stationsGeo, lineColors) {
+    for (const f of stationsGeo.features) {
+      const isTransfer = f.properties.lines.length > 1;
+      const primary = f.properties.lines[0];
+      const baseStyle = isTransfer
+        ? {
+            radius: 5,
+            fillColor: 'white',
+            color: 'black',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 1,
+            className: 'station-dot',
+          }
+        : {
+            radius: 5,
+            fillColor: lineColors[primary] || '#666',
+            color: 'white',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 1,
+            className: 'station-dot',
+          };
+      const latlng = [f.geometry.coordinates[1], f.geometry.coordinates[0]];
+      const dot = L.circleMarker(latlng, baseStyle);
+      const name = f.properties.name;
+      // No bindTooltip, no title, no aria-label — never reveal the answer.
+      dot.on('click', (ev) => {
+        L.DomEvent.stopPropagation(ev);
+        onDotClick(name);
+      });
+      dot.addTo(map);
+      dots.set(name, { layer: dot, baseStyle, latlng });
+    }
+  }
+
+  Promise.all([
+    fetch('./metro-quiz/lines.geojson').then(r => r.json()),
+    fetch('./metro-quiz/stations.geojson').then(r => r.json()),
+  ]).then(([linesGeo, stationsGeo]) => {
+    const lineColors = {};
+    for (const f of linesGeo.features) {
+      lineColors[f.properties.ref] = f.properties.colour;
+    }
+
+    L.geoJSON(linesGeo, {
+      style: f => ({
+        color: f.properties.colour,
+        weight: 4,
+        opacity: 0.7,
+        interactive: false,
+      }),
+    }).addTo(map);
+
+    buildStations(stationsGeo, lineColors);
+    mapEl.classList.remove('loading');
+    startGame();
+  }).catch(err => {
+    promptEl.textContent = 'Erreur de chargement';
+    scoreEl.textContent = String(err);
+  });
+})();
+</script>
+</body>
+</html>
