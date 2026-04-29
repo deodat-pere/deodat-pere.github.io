@@ -100,8 +100,7 @@
     text-align: center;
   }
   #end-screen h2 { margin: 0 0 8px; font-size: 2em; }
-  #end-screen .score-line { font-size: 1.3em; margin: 8px 0; }
-  #end-screen .record { font-size: 1em; opacity: 0.85; margin: 4px 0 24px; }
+  #end-screen .score-line { font-size: 1.3em; margin: 8px 0 20px; }
   .end-buttons {
     display: flex; gap: 10px; flex-wrap: wrap;
     justify-content: center;
@@ -119,6 +118,70 @@
     border-radius: 6px; cursor: pointer;
   }
   #explore-btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+  #line-selection {
+    position: fixed; inset: 0;
+    background: rgba(26, 26, 46, 0.97);
+    color: white;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+    text-align: center;
+    overflow-y: auto;
+  }
+  #line-selection h2 { margin: 0 0 6px; font-size: 2em; }
+  .sel-subtitle { margin: 0 0 22px; opacity: 0.65; font-size: 0.95em; }
+  #line-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    max-width: 500px;
+    margin-bottom: 28px;
+  }
+  .line-label {
+    cursor: pointer;
+    user-select: none;
+  }
+  .line-label input { display: none; }
+  .line-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 52px;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 19px;
+    font-weight: 700;
+    font-size: 0.95em;
+    border: 3px solid transparent;
+    transition: opacity 0.15s, border-color 0.15s;
+  }
+  .line-label:has(input:not(:checked)) .line-badge {
+    opacity: 0.25;
+  }
+  .line-label:has(input:checked) .line-badge {
+    border-color: white;
+  }
+  .sel-actions {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    justify-content: center;
+  }
+  .sel-toggle-btn {
+    background: transparent; color: white;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 10px 20px; font-size: 0.95em;
+    border-radius: 6px; cursor: pointer;
+  }
+  .sel-toggle-btn:hover { background: rgba(255, 255, 255, 0.1); }
+  .sel-start-btn {
+    background: #e94560; color: white; border: none;
+    padding: 10px 28px; font-size: 1em; font-weight: 600;
+    border-radius: 6px; cursor: pointer;
+  }
+  .sel-start-btn:hover:not(:disabled) { background: #ff5773; }
+  .sel-start-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
   @media (max-width: 480px) {
     #prompt { font-size: 1.25em; }
@@ -149,11 +212,13 @@
   'use strict';
 
   const PARIS_CENTER = [48.8566, 2.3522];
-  const BEST_KEY = 'metro-quiz:best';
 
   const promptEl = document.getElementById('prompt');
   const scoreEl  = document.getElementById('score');
   const mapEl    = document.getElementById('map');
+  const timerEl  = document.getElementById('timer');
+  const prevBtn  = document.getElementById('prev-btn');
+  const nextBtn  = document.getElementById('next-btn');
 
   const map = L.map('map', {
     center: PARIS_CENTER,
@@ -175,10 +240,14 @@
     maxZoom: 19,
   }).addTo(map);
 
-  // Game state
-  let dots = new Map();   // stationName -> { layer, baseStyle, answered }
-  let order = [];         // shuffled list of station names
-  let index = 0;          // cursor into `order`
+  // ---- loaded data ----
+  let allLines = [];               // [{ref, colour}] sorted
+  let lineLayersByRef = new Map(); // ref -> L.GeoJSON layer
+  let dots = new Map();            // name -> {layer, baseStyle, lines, answered}
+
+  // ---- game state ----
+  let order = [];
+  let index = 0;
   let currentName = null;
   let total = 0;
   let correct = 0;
@@ -187,9 +256,18 @@
   let timerInterval = null;
   let elapsedMs = 0;
 
-  const timerEl = document.getElementById('timer');
-  const prevBtn = document.getElementById('prev-btn');
-  const nextBtn = document.getElementById('next-btn');
+  function sortLineRef(a, b) {
+    const na = parseInt(a, 10), nb = parseInt(b, 10);
+    if (na !== nb) return na - nb;
+    return a.length - b.length;
+  }
+
+  function textColorForBg(hex) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55 ? '#1a1a2e' : 'white';
+  }
 
   function shuffle(arr) {
     const a = arr.slice();
@@ -201,15 +279,8 @@
   }
 
   function fmtTime(ms) {
-    const total = Math.floor(ms / 1000);
-    const m = Math.floor(total / 60);
-    const s = total % 60;
-    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-  }
-
-  function tickTimer() {
-    elapsedMs = Date.now() - timerStart;
-    timerEl.textContent = fmtTime(elapsedMs);
+    const s = Math.floor(ms / 1000);
+    return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
   }
 
   function startTimer() {
@@ -217,7 +288,10 @@
     elapsedMs = 0;
     timerEl.textContent = '00:00';
     if (timerInterval) clearInterval(timerInterval);
-    timerInterval = setInterval(tickTimer, 250);
+    timerInterval = setInterval(() => {
+      elapsedMs = Date.now() - timerStart;
+      timerEl.textContent = fmtTime(elapsedMs);
+    }, 250);
   }
 
   function stopTimer() {
@@ -243,7 +317,6 @@
     updateScore();
   }
 
-  // Navigation wraps circularly through the still-unanswered stations.
   function goPrev() {
     if (busy || order.length === 0) return;
     index = (index - 1 + order.length) % order.length;
@@ -257,10 +330,9 @@
   }
 
   function revealStation(entry, name, isCorrect) {
-    const color = isCorrect ? '#22c55e' : '#e94560';
     entry.layer.setStyle({
       ...entry.baseStyle,
-      fillColor: color,
+      fillColor: isCorrect ? '#22c55e' : '#e94560',
       color: 'white',
       weight: 2,
       radius: 7,
@@ -273,59 +345,65 @@
 
   function onDotClick(name) {
     if (busy || currentName == null) return;
-    if (dots.get(name).answered) return; // already revealed; let tooltip handle it
+    if (dots.get(name).answered) return;
     busy = true;
 
     const correctEntry = dots.get(currentName);
-    const isCorrect = name === currentName;
-
-    // The marker always lands on the correct station — green if the player
-    // got it, red if they missed. Either way, station name is revealed on
-    // hover from now on.
-    revealStation(correctEntry, currentName, isCorrect);
-
-    if (isCorrect) correct++;
+    revealStation(correctEntry, currentName, name === currentName);
+    if (name === currentName) correct++;
     updateScore();
 
     setTimeout(() => {
       busy = false;
-      // The just-answered station drops out of the navigable list.
-      // After this splice, `index` either points to what was the next
-      // station, or sits past the end (handled by showPrompt's wrap).
       order.splice(index, 1);
-      if (order.length === 0) {
-        endGame();
-        return;
-      }
+      if (order.length === 0) { endGame(); return; }
       showPrompt();
     }, 350);
   }
 
-  function resetDots() {
-    for (const entry of dots.values()) {
-      entry.layer.setStyle(entry.baseStyle);
-      entry.layer.unbindTooltip();
-      entry.answered = false;
-    }
-  }
+  prevBtn.addEventListener('click', goPrev);
+  nextBtn.addEventListener('click', goNext);
 
-  function startGame() {
+  function startGame(selectedLines) {
     correct = 0;
     busy = false;
-    resetDots();
-    order = shuffle([...dots.keys()]);
-    total = order.length;
     index = 0;
     prevBtn.disabled = false;
     nextBtn.disabled = false;
+
+    for (const { ref } of allLines) {
+      const layer = lineLayersByRef.get(ref);
+      if (selectedLines.has(ref)) {
+        if (!map.hasLayer(layer)) layer.addTo(map);
+      } else {
+        if (map.hasLayer(layer)) map.removeLayer(layer);
+      }
+    }
+
+    for (const [, entry] of dots) {
+      const inGame = entry.lines.some(l => selectedLines.has(l));
+      entry.layer.setStyle(entry.baseStyle);
+      entry.layer.unbindTooltip();
+      entry.answered = false;
+      if (inGame) {
+        if (!map.hasLayer(entry.layer)) entry.layer.addTo(map);
+      } else {
+        if (map.hasLayer(entry.layer)) map.removeLayer(entry.layer);
+      }
+    }
+
+    order = shuffle(
+      [...dots.entries()]
+        .filter(([, e]) => e.lines.some(l => selectedLines.has(l)))
+        .map(([name]) => name)
+    );
+    total = order.length;
+
     const ov = document.getElementById('end-screen');
     if (ov) ov.remove();
     startTimer();
     showPrompt();
   }
-
-  prevBtn.addEventListener('click', goPrev);
-  nextBtn.addEventListener('click', goNext);
 
   function endGame() {
     stopTimer();
@@ -334,27 +412,73 @@
     promptEl.textContent = 'Terminé !';
     scoreEl.textContent = correct + ' / ' + total + ' bonnes réponses';
 
-    const prev = parseInt(localStorage.getItem(BEST_KEY) || '0', 10);
-    const isNew = correct > prev;
-    if (isNew) localStorage.setItem(BEST_KEY, String(correct));
-
     const overlay = document.createElement('div');
     overlay.id = 'end-screen';
-    const recordLine = isNew
-      ? 'Nouveau record !'
-      : (prev > 0 ? 'Record : ' + prev + ' / ' + total : '');
     overlay.innerHTML =
       '<h2>Terminé !</h2>' +
       '<div class="score-line">' + correct + ' / ' + total + ' bonnes réponses</div>' +
       '<div class="score-line">Temps : ' + fmtTime(elapsedMs) + '</div>' +
-      (recordLine ? '<div class="record">' + recordLine + '</div>' : '') +
       '<div class="end-buttons">' +
         '<button id="replay-btn" type="button">Rejouer</button>' +
         '<button id="explore-btn" type="button">Explorer la carte</button>' +
       '</div>';
     document.body.appendChild(overlay);
-    document.getElementById('replay-btn').onclick = startGame;
+    document.getElementById('replay-btn').onclick = showLineSelection;
     document.getElementById('explore-btn').onclick = () => overlay.remove();
+  }
+
+  function showLineSelection() {
+    const existing = document.getElementById('line-selection');
+    if (existing) existing.remove();
+    const endScreen = document.getElementById('end-screen');
+    if (endScreen) endScreen.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'line-selection';
+
+    const linesHtml = allLines.map(({ ref, colour }) => {
+      const tc = textColorForBg(colour);
+      return '<label class="line-label">' +
+        '<input type="checkbox" class="line-cb" value="' + ref + '" checked>' +
+        '<span class="line-badge" style="background:' + colour + ';color:' + tc + '">' + ref + '</span>' +
+        '</label>';
+    }).join('');
+
+    overlay.innerHTML =
+      '<h2>Quiz Métro Parisien</h2>' +
+      '<p class="sel-subtitle">Choisissez les lignes à inclure</p>' +
+      '<div id="line-grid">' + linesHtml + '</div>' +
+      '<div class="sel-actions">' +
+        '<button id="sel-toggle-btn" type="button" class="sel-toggle-btn">Tout désélectionner</button>' +
+        '<button id="sel-start-btn" type="button" class="sel-start-btn">Commencer</button>' +
+      '</div>';
+
+    document.body.appendChild(overlay);
+
+    const checkboxes = overlay.querySelectorAll('.line-cb');
+    const startBtn   = overlay.querySelector('#sel-start-btn');
+    const toggleBtn  = overlay.querySelector('#sel-toggle-btn');
+
+    function sync() {
+      const allChecked = [...checkboxes].every(cb => cb.checked);
+      const anyChecked = [...checkboxes].some(cb => cb.checked);
+      toggleBtn.textContent = allChecked ? 'Tout désélectionner' : 'Tout sélectionner';
+      startBtn.disabled = !anyChecked;
+    }
+
+    checkboxes.forEach(cb => cb.addEventListener('change', sync));
+    toggleBtn.addEventListener('click', () => {
+      const allChecked = [...checkboxes].every(cb => cb.checked);
+      checkboxes.forEach(cb => { cb.checked = !allChecked; });
+      sync();
+    });
+    startBtn.addEventListener('click', () => {
+      const selected = new Set([...checkboxes].filter(cb => cb.checked).map(cb => cb.value));
+      overlay.remove();
+      startGame(selected);
+    });
+
+    sync();
   }
 
   function buildStations(stationsGeo, lineColors) {
@@ -362,34 +486,14 @@
       const isTransfer = f.properties.lines.length > 1;
       const primary = f.properties.lines[0];
       const baseStyle = isTransfer
-        ? {
-            radius: 5,
-            fillColor: 'white',
-            color: 'black',
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 1,
-            className: 'station-dot',
-          }
-        : {
-            radius: 5,
-            fillColor: lineColors[primary] || '#666',
-            color: 'white',
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 1,
-            className: 'station-dot',
-          };
+        ? { radius: 5, fillColor: 'white', color: 'black', weight: 2, opacity: 1, fillOpacity: 1, className: 'station-dot' }
+        : { radius: 5, fillColor: lineColors[primary] || '#666', color: 'white', weight: 2, opacity: 1, fillOpacity: 1, className: 'station-dot' };
       const latlng = [f.geometry.coordinates[1], f.geometry.coordinates[0]];
       const dot = L.circleMarker(latlng, baseStyle);
       const name = f.properties.name;
-      // No bindTooltip, no title, no aria-label — never reveal the answer.
-      dot.on('click', (ev) => {
-        L.DomEvent.stopPropagation(ev);
-        onDotClick(name);
-      });
+      dot.on('click', (ev) => { L.DomEvent.stopPropagation(ev); onDotClick(name); });
       dot.addTo(map);
-      dots.set(name, { layer: dot, baseStyle, latlng });
+      dots.set(name, { layer: dot, baseStyle, lines: f.properties.lines, answered: false });
     }
   }
 
@@ -397,23 +501,25 @@
     fetch('./metro-quiz/lines.geojson').then(r => r.json()),
     fetch('./metro-quiz/stations.geojson').then(r => r.json()),
   ]).then(([linesGeo, stationsGeo]) => {
-    const lineColors = {};
+    const lineColorMap = {};
+    const refsSeen = new Set();
     for (const f of linesGeo.features) {
-      lineColors[f.properties.ref] = f.properties.colour;
+      lineColorMap[f.properties.ref] = f.properties.colour;
+      refsSeen.add(f.properties.ref);
+    }
+    allLines = [...refsSeen].sort(sortLineRef).map(ref => ({ ref, colour: lineColorMap[ref] }));
+
+    for (const { ref, colour } of allLines) {
+      const features = linesGeo.features.filter(f => f.properties.ref === ref);
+      lineLayersByRef.set(ref, L.geoJSON(
+        { type: 'FeatureCollection', features },
+        { style: { color: colour, weight: 4, opacity: 0.7, interactive: false } }
+      ).addTo(map));
     }
 
-    L.geoJSON(linesGeo, {
-      style: f => ({
-        color: f.properties.colour,
-        weight: 4,
-        opacity: 0.7,
-        interactive: false,
-      }),
-    }).addTo(map);
-
-    buildStations(stationsGeo, lineColors);
+    buildStations(stationsGeo, lineColorMap);
     mapEl.classList.remove('loading');
-    startGame();
+    showLineSelection();
   }).catch(err => {
     promptEl.textContent = 'Erreur de chargement';
     scoreEl.textContent = String(err);
