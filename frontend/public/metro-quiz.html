@@ -183,6 +183,57 @@
   .sel-start-btn:hover:not(:disabled) { background: #ff5773; }
   .sel-start-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
+  /* results-btn: shown in header when game has ended and explore mode is active */
+  #results-btn {
+    display: none;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.35);
+    color: white; padding: 4px 12px;
+    font-size: 0.82em; font-weight: 600;
+    border-radius: 4px; cursor: pointer; white-space: nowrap;
+  }
+  #results-btn:hover { background: rgba(255,255,255,0.25); }
+
+  /* per-line stats table inside end screen */
+  .stats-section { width: 100%; max-width: 420px; margin: 4px 0 20px; }
+  .stats-controls {
+    display: flex; gap: 6px; justify-content: center;
+    margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .sort-btn {
+    background: rgba(255,255,255,0.1); color: white;
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 5px 14px; font-size: 0.82em;
+    border-radius: 4px; cursor: pointer;
+  }
+  .sort-btn.active { background: rgba(255,255,255,0.28); border-color: rgba(255,255,255,0.6); }
+  .sort-btn:hover:not(.active) { background: rgba(255,255,255,0.18); }
+  #copy-btn {
+    background: rgba(255,255,255,0.1); color: white;
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 5px 14px; font-size: 0.82em;
+    border-radius: 4px; cursor: pointer; margin-left: 4px;
+  }
+  #copy-btn:hover { background: rgba(255,255,255,0.2); }
+  .stats-rows { display: flex; flex-direction: column; gap: 5px; }
+  .stat-row {
+    display: flex; align-items: center; gap: 8px; font-size: 0.85em;
+  }
+  .stat-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 44px; height: 26px; padding: 0 8px;
+    border-radius: 13px; font-weight: 700; font-size: 0.82em; flex: 0 0 auto;
+  }
+  .stat-bar-wrap {
+    flex: 1; height: 7px; background: rgba(255,255,255,0.12);
+    border-radius: 4px; overflow: hidden; min-width: 40px;
+  }
+  .stat-bar { height: 100%; border-radius: 4px; }
+  .stat-nums {
+    flex: 0 0 auto; font-variant-numeric: tabular-nums;
+    opacity: 0.9; min-width: 86px; text-align: right; font-size: 0.88em;
+  }
+
   @media (max-width: 480px) {
     #prompt { font-size: 1.25em; }
   }
@@ -193,7 +244,10 @@
   <header>
     <div class="header-top">
       <h1>Quiz Métro Parisien</h1>
-      <div id="timer">00:00</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button id="results-btn" type="button">Résultats</button>
+        <div id="timer">00:00</div>
+      </div>
     </div>
     <div class="prompt-row">
       <button id="prev-btn" class="nav-btn" type="button" aria-label="Question précédente">‹</button>
@@ -216,9 +270,10 @@
   const promptEl = document.getElementById('prompt');
   const scoreEl  = document.getElementById('score');
   const mapEl    = document.getElementById('map');
-  const timerEl  = document.getElementById('timer');
-  const prevBtn  = document.getElementById('prev-btn');
-  const nextBtn  = document.getElementById('next-btn');
+  const timerEl     = document.getElementById('timer');
+  const prevBtn     = document.getElementById('prev-btn');
+  const nextBtn     = document.getElementById('next-btn');
+  const resultsBtn  = document.getElementById('results-btn');
 
   const map = L.map('map', {
     center: PARIS_CENTER,
@@ -255,6 +310,8 @@
   let timerStart = 0;
   let timerInterval = null;
   let elapsedMs = 0;
+  let activeSelectedLines = new Set();
+  let endScreenEl = null;
 
   function sortLineRef(a, b) {
     const na = parseInt(a, 10), nb = parseInt(b, 10);
@@ -341,6 +398,7 @@
     entry.layer.bringToFront();
     entry.layer.bindTooltip(name, { direction: 'top', sticky: false });
     entry.answered = true;
+    entry.correct = isCorrect;
   }
 
   function onDotClick(name) {
@@ -363,13 +421,20 @@
 
   prevBtn.addEventListener('click', goPrev);
   nextBtn.addEventListener('click', goNext);
+  resultsBtn.addEventListener('click', () => {
+    if (endScreenEl) endScreenEl.style.display = 'flex';
+  });
 
   function startGame(selectedLines) {
+    activeSelectedLines = selectedLines;
     correct = 0;
     busy = false;
     index = 0;
     prevBtn.disabled = false;
     nextBtn.disabled = false;
+    resultsBtn.style.display = 'none';
+
+    if (endScreenEl) { endScreenEl.remove(); endScreenEl = null; }
 
     for (const { ref } of allLines) {
       const layer = lineLayersByRef.get(ref);
@@ -385,6 +450,7 @@
       entry.layer.setStyle(entry.baseStyle);
       entry.layer.unbindTooltip();
       entry.answered = false;
+      entry.correct = null;
       if (inGame) {
         if (!map.hasLayer(entry.layer)) entry.layer.addTo(map);
       } else {
@@ -399,10 +465,22 @@
     );
     total = order.length;
 
-    const ov = document.getElementById('end-screen');
-    if (ov) ov.remove();
     startTimer();
     showPrompt();
+  }
+
+  function computeLineStats() {
+    return [...activeSelectedLines].sort(sortLineRef).map(ref => {
+      let lineTotal = 0, lineCorrect = 0;
+      for (const entry of dots.values()) {
+        if (!entry.lines.includes(ref)) continue;
+        lineTotal++;
+        if (entry.correct === true) lineCorrect++;
+      }
+      const pct = lineTotal > 0 ? Math.round(100 * lineCorrect / lineTotal) : 0;
+      const colour = allLines.find(l => l.ref === ref)?.colour || '#666';
+      return { ref, lineTotal, lineCorrect, pct, colour };
+    });
   }
 
   function endGame() {
@@ -412,26 +490,88 @@
     promptEl.textContent = 'Terminé !';
     scoreEl.textContent = correct + ' / ' + total + ' bonnes réponses';
 
+    const stats = computeLineStats();
+
     const overlay = document.createElement('div');
     overlay.id = 'end-screen';
+
+    function statsRowsHtml(sorted) {
+      return sorted.map(s => {
+        const tc = textColorForBg(s.colour);
+        return '<div class="stat-row">' +
+          '<span class="stat-badge" style="background:' + s.colour + ';color:' + tc + '">' + s.ref + '</span>' +
+          '<div class="stat-bar-wrap"><div class="stat-bar" style="width:' + s.pct + '%;background:' + s.colour + '"></div></div>' +
+          '<span class="stat-nums">' + s.lineCorrect + ' / ' + s.lineTotal + ' · ' + s.pct + '%</span>' +
+          '</div>';
+      }).join('');
+    }
+
+    function buildText(sorted) {
+      const lines = ['Quiz Métro Parisien — ' + correct + ' / ' + total + ' — ' + fmtTime(elapsedMs)];
+      for (const s of sorted) {
+        lines.push('Ligne ' + s.ref.padEnd(4) + ' : ' + s.lineCorrect + ' / ' + s.lineTotal + '  (' + s.pct + '%)');
+      }
+      return lines.join('\n');
+    }
+
     overlay.innerHTML =
       '<h2>Terminé !</h2>' +
       '<div class="score-line">' + correct + ' / ' + total + ' bonnes réponses</div>' +
       '<div class="score-line">Temps : ' + fmtTime(elapsedMs) + '</div>' +
+      '<div class="stats-section">' +
+        '<div class="stats-controls">' +
+          '<button class="sort-btn active" id="sort-line-btn" type="button">Par ligne</button>' +
+          '<button class="sort-btn" id="sort-pct-btn" type="button">Par réussite</button>' +
+          '<button id="copy-btn" type="button">Copier les résultats</button>' +
+        '</div>' +
+        '<div class="stats-rows" id="stats-rows">' + statsRowsHtml(stats) + '</div>' +
+      '</div>' +
       '<div class="end-buttons">' +
         '<button id="replay-btn" type="button">Rejouer</button>' +
         '<button id="explore-btn" type="button">Explorer la carte</button>' +
       '</div>';
+
     document.body.appendChild(overlay);
-    document.getElementById('replay-btn').onclick = showLineSelection;
-    document.getElementById('explore-btn').onclick = () => overlay.remove();
+    endScreenEl = overlay;
+    resultsBtn.style.display = 'inline-block';
+
+    let sortBy = 'line';
+    const rowsEl = overlay.querySelector('#stats-rows');
+    const sortLineBtn = overlay.querySelector('#sort-line-btn');
+    const sortPctBtn = overlay.querySelector('#sort-pct-btn');
+
+    function applySort(by) {
+      sortBy = by;
+      const sorted = by === 'pct'
+        ? [...stats].sort((a, b) => b.pct - a.pct || sortLineRef(a.ref, b.ref))
+        : [...stats].sort((a, b) => sortLineRef(a.ref, b.ref));
+      rowsEl.innerHTML = statsRowsHtml(sorted);
+      sortLineBtn.classList.toggle('active', by === 'line');
+      sortPctBtn.classList.toggle('active', by === 'pct');
+    }
+
+    sortLineBtn.addEventListener('click', () => applySort('line'));
+    sortPctBtn.addEventListener('click', () => applySort('pct'));
+
+    overlay.querySelector('#copy-btn').addEventListener('click', () => {
+      const sorted = sortBy === 'pct'
+        ? [...stats].sort((a, b) => b.pct - a.pct || sortLineRef(a.ref, b.ref))
+        : [...stats].sort((a, b) => sortLineRef(a.ref, b.ref));
+      const text = buildText(sorted);
+      navigator.clipboard.writeText(text).catch(() => { prompt('Copiez le texte :', text); });
+    });
+
+    overlay.querySelector('#replay-btn').onclick = showLineSelection;
+    overlay.querySelector('#explore-btn').onclick = () => {
+      overlay.style.display = 'none';
+    };
   }
 
   function showLineSelection() {
     const existing = document.getElementById('line-selection');
     if (existing) existing.remove();
-    const endScreen = document.getElementById('end-screen');
-    if (endScreen) endScreen.remove();
+    if (endScreenEl) { endScreenEl.remove(); endScreenEl = null; }
+    resultsBtn.style.display = 'none';
 
     const overlay = document.createElement('div');
     overlay.id = 'line-selection';
