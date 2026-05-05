@@ -56,14 +56,10 @@ jobs:
           target/debug/scraper
       - name: Build cinema frontend
         run: |
+          sed -i 's|<BrowserRouter>|<BrowserRouter basename="/cine-paris">|' agregcine/frontend/src/App.tsx
           cd agregcine/frontend
           npm install
           npm run build -- --base=/cine-paris/
-      - name: Patch cinema index.html for subpath routing
-        # Strips the /cine-paris prefix before React boots so React Router
-        # matches routes without needing basename set in the source.
-        run: |
-          sed -i 's|<script type="module"|<script>(function(){var b="/cine-paris",p=location.pathname;if(p.startsWith(b))history.replaceState(null,"",p.slice(b.length)\|\|"/");})();</script><script type="module"|' agregcine/frontend/dist/index.html
       - name: Deploy
         run: |
           git config --global user.name "GithubAction"
