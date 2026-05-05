@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>deod.at</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f0f0f;
+      color: #e8e8e8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #fff;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      color: #888;
+      font-size: 1rem;
+    }
+
+    .projects {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 720px;
+      width: 100%;
+    }
+
+    .card {
+      flex: 1 1 280px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 1.75rem;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+
+    .card:hover {
+      border-color: #555;
+      transform: translateY(-2px);
+    }
+
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .card h2 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: #888;
+      line-height: 1.5;
+    }
+
+    footer {
+      margin-top: 3rem;
+      color: #444;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>deod.at</h1>
+    <p>Quelques projets web</p>
+  </header>
+
+  <main class="projects">
+    <a class="card" href="/cine-paris">
+      <div class="card-icon">🎬</div>
+      <h2>Ciné Paris</h2>
+      <p>Les films diffusés cette semaine dans les cinémas parisiens — séances, horaires et descriptions.</p>
+    </a>
+
+    <a class="card" href="/quiz/metro-quiz.html">
+      <div class="card-icon">🗺️</div>
+      <h2>Quiz Métro</h2>
+      <p>Saurez-vous placer les stations du métro parisien sur la carte ?</p>
+    </a>
+  </main>
+
+  <footer>deod.at</footer>
+</body>
+</html>
