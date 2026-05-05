@@ -72,7 +72,6 @@ jobs:
           mkdir -p cine-paris assets
           cp -r agregcine/frontend/dist/* cine-paris/
           cp agregcine/scraper/movies.json assets/
-          cp -r quiz .
           rm -rf agregcine scraper-config.json .github
           echo "deod.at" > CNAME
           git add .
